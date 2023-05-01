@@ -1,0 +1,75 @@
+{% extends "movie_sys/base.html" %}
+
+{% block content %}
+<center><h1>{{ object.theater.theater_name }}</h1></center>
+<hr style="color: white">
+<h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
+
+<div class="seat_pay">
+  <div class="seat">
+    <table>
+      <tbody>
+        <tr>
+          <td></td>
+          {% for col in cols %}
+            <td>{{ col }} C</td>
+          {% endfor %}
+        </tr>
+        {% for row in rows %}
+          <tr>
+            <td>{{ row }} R</td>
+            {% for col in cols %}
+              <td><input type="checkbox" class="seat_box" name="seat" value="{{ row }}-{{ col }}"></td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <span>->->->->->->->->->Screen here-<-<-<-<-<-<-<-<-</span>
+  </div>
+  <div class="pay">
+    <h1>payment</h1>
+    <form method="post" action="#">
+    <input type="text" placeholder="offer/ promo" id="promo"><br>
+    <input type="checkbox" class="check" id="check" value=" ">
+    <label for="check"> I accept all the terms and conditions</label><br>
+    <p>Selected Seats:</p>
+    <ul id="selected_seats_list"></ul>
+
+    <button type="button" class="btn btn-success">Pay</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  // Get the list element
+  var selectedSeatsList = document.getElementById("selected_seats_list");
+
+  // Get all the seat checkboxes
+  var seatBoxes = document.getElementsByClassName("seat_box");
+
+  // Loop through the checkboxes and add a change listener
+  for (var i = 0; i < seatBoxes.length; i++) {
+    seatBoxes[i].addEventListener("change", function() {
+      // Create an empty array to store the selected seats
+      var selectedSeats = [];
+
+      // Loop through the checkboxes again and add the selected seats to the array
+      for (var j = 0; j < seatBoxes.length; j++) {
+        if (seatBoxes[j].checked) {
+          var seatRow = seatBoxes[j].value.split('-')[0];
+          var seatCol = seatBoxes[j].value.split('-')[1];
+          selectedSeats.push(seatRow + String.fromCharCode(64 + parseInt(seatCol)));
+        }
+      }
+
+      // Set the text of the list element to the selected seats array
+      var numSelectedSeats = selectedSeats.length;
+      var selectedSeatsMessage = numSelectedSeats + " seat(s) selected: " + selectedSeats.join(", ");
+      selectedSeatsList.textContent = selectedSeatsMessage;
+    });
+  }
+</script>
+{% endblock %}

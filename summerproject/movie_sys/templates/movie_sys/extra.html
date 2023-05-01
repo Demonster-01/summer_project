@@ -1,0 +1,408 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'movie_sys/main.css' %}">
+
+    {% if title %}
+        <title>Django movie_sys - {{ title }}</title>
+    {% else %}
+        <title>Django movie_sys</title>
+    {% endif %}
+</head>
+<body>
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+        <div class="container">
+          <a class="navbar-brand mr-4" href="{% url 'movie_sys-home' %}">Django movie_sys</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarToggle">
+            <div class="navbar-nav mr-auto">
+              <a class="nav-item nav-link" href="{% url 'movie_sys-home' %}">Home</a>
+              <a class="nav-item nav-link" href="{% url 'movie_sys-about' %}">About</a>
+            </div>
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav">
+              {% if user.is_authenticated %}
+                <a class="nav-item nav-link" href="{% url 'post-create' %}">New Post</a>
+                <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
+                <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+              {% else %}
+                <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main role="main" class="container">
+      <div class="row">
+        <div class="col-md-8">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+          {% block content %}{% endblock %}
+        </div>
+        <div class="col-md-4">
+          <div class="content-section">
+            <h3>Our Sidebar</h3>
+            <p class='text-muted'>You can put any information here you'd like.
+              <ul class="list-group">
+                <li class="list-group-item list-group-item-light">Latest Posts</li>
+                <li class="list-group-item list-group-item-light">Announcements</li>
+                <li class="list-group-item list-group-item-light">Calendars</li>
+                <li class="list-group-item list-group-item-light">etc</li>
+              </ul>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
+
+
+
+
+python manage.py flush
+
+
+
+
+
+
+
+
+
+
+
+
+<!--home html-->
+
+<!--{% extends "movie_sys/base.html" %}-->
+<!--{% block content %}-->
+<!--          <div class="media-body">-->
+<!--            <h2><a class="article-title" href="#">this is home</a></h2>-->
+<!--            <p class="article-content">tryst</p>-->
+<!--          </div><div class="container mt-5">-->
+<!--    <div class="row">-->
+<!--      {% for theater in theaters %}-->
+<!--        <div class="col-md-4">-->
+<!--          <div class="card mb-4 box-shadow">-->
+<!--            <img class="card-img-top" src="{{ theater.logo.url }}" alt="{{ theater.name }}">-->
+<!--            <div class="card-body">-->
+<!--              <h5 class="card-title">{{ theater.name }}</h5>-->
+<!--              <p class="card-text">{{ theater.address }}</p>-->
+<!--              <div class="d-flex justify-content-between align-items-center">-->
+<!--&lt;!&ndash;                <a href="{% url 'movie_sys-movie_coll' %}" class="btn btn-sm btn-outline-secondary">View Details</a>&ndash;&gt;-->
+<!--<a href="{% url 'movie_sys-movie_coll' %}" class="btn btn-sm btn-outline-secondary">View Details</a>-->
+<!--             <a class="nav-link" href="{% url 'movie_sys-movie_coll' theater_name=theater.name %}">Movie Collection</a>-->
+
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      {% endfor %}-->
+<!--    </div>-->
+<!--  </div>-->
+<!--{% endblock %}-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.movies
+{
+	width: 100%;
+	background: #FFFFFF;
+	padding-top: 115px;
+	padding-bottom: 116px;
+}
+.section_subtitle
+{
+	font-family: 'Oswald', sans-serif;
+	font-size: 12px;
+	font-weight: 400;
+	color: #72728c;
+	line-height: 0.75;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+}
+.section_title
+{
+	color: #181818;
+	margin-top: 26px;
+}
+.movies_row
+{
+	margin-top: 99px;
+}
+.movie_image
+{
+	width: 100%;
+}
+.movie_image img
+{
+	max-width: 100%;
+}
+.spec_offer
+{
+	position: absolute;
+	top: 15px;
+	left: 16px;
+	width: 118px;
+	height: 36px;
+	background: #181818;
+}
+.spec_offer a
+{
+	display: block;
+	font-family: 'Oswald', sans-serif;
+	font-size: 16px;
+	color: #FFFFFF;
+	line-height: 36px;
+	font-weight: 400;
+}
+.movies_container
+{
+	width: calc(100% + 30px);
+	left: -15px;
+}
+.movie
+{
+	width: calc(100% / 3);
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-bottom: 33px;
+}
+.movie_content
+{
+
+}
+.movie_title
+{
+	margin-top: 15px;
+}
+.movie_title a
+{
+	font-family: 'Oswald', sans-serif;
+	font-size: 30px;
+	font-weight: 400;
+	color: #181818;
+}
+.movie_subtitle
+{
+	margin-top: -4px;
+}
+.movie_price
+{
+	font-size: 16px;
+	font-weight: 700;
+	color: #181818;
+	margin-top: 16px;
+}
+
+
+
+
+
+
+
+{% extends "movie_sys/base.html" %}
+
+{% block content %}
+<div class="gallery">
+    <div class="row">
+        {% for theaters in theater %}
+        <div class="item">
+            <img src="{{ theaters.logo.url }}" alt="{{ theaters.name }}" width="200px" height="100px">
+            <div class="details">
+                <h2>{{ theaters.theaters_name }}</h2>
+                <a href="{% url 'movie_sys-movie_coll' theaters.id %}" class="btn btn-primary">Visit</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="container">
+  <h2>Theaters</h2>
+  <div class="row">
+    {% for theaters in theater %}
+      <div class="col-md-4">
+        <div class="card">
+          <img class="card-img-top" src="{{ theaters.logo.url  }}" alt="{{ theaters.name }}">
+          <div class="card-body">
+            <h5 class="card-title">{{ theaters.name }}</h5>
+            <p class="card-text">{{ theaters.description }}</p>
+            <a href="{% url 'movie_sys-movie_coll' theaters.id %}" class="btn btn-primary">View Details</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% extends "movie_sys/base.html" %}
+
+{% block content %}
+<h1 xmlns:width="http://www.w3.org/1999/xhtml">{{ theater_name }} Movies</h1>
+
+{% if movies %}
+ {% for movie in movies %}
+<div class="movie-container">
+  <div class="movie-poster">
+    <img src="{{ movie.poster.url }}" alt="Movie Poster" width="150px" width="300px">
+  </div>
+  <div class="movie-details">
+    <h2>Movie Title:{{ movie.title }}</h2>
+    <p>Movie description goes here.</p>
+    <ul class="movie-meta">
+      <li><strong>Director:</strong> Director name:{{ movie.Directed_by }}</li>
+      <li><strong>Genre:</strong> {{ movie.genre }}</li>
+      <li><strong>Release Date:</strong> January 1, 2022</li>
+    </ul>
+  </div>
+</div>
+
+
+
+{% endfor %}
+{% else %}
+    <p>No movies found.</p>
+                     </div>
+            </div>
+
+{% endif %}
+
+
+<div class="container">
+  <h2 class="text-center my-5">Upcomming Movies</h2>
+  <div class="gallery">
+    {% for upcomming in upcommings %}
+      <div class="upcomming_item">
+        <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="200px" height="200px" >
+        <div class="details">
+          <h2>{{ upcomming.title }}</h2>
+          <p><strong>Genre:</strong> {{ upcomming.genre }}</p>
+          <p><strong>Cast:</strong> {{ upcomming.cast }}</p>
+          <p><strong>Directed By:</strong> {{ upcomming.directed_by }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock content %}
+
+
+
+
+
+
+<!--movie_coll-->
+
+  {% if movies %}
+    <div class="movie-container">
+      {% for movie in movies %}
+        <div class="movie-card">
+          <div class="movie-poster">
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}"  width="200px" height="200px">
+          </div>
+          <div class="movie-details">
+            <h2>{{ movie.title }}</h2>
+            <p>{{ movie.description }}</p>
+            <ul class="movie-meta">
+              <li><strong>Director:</strong> {{ movie.director }}</li>
+              <li><strong>Genre:</strong> {{ movie.genre }}</li>
+              <li><strong>Release Date:</strong> {{ movie.release_date }}</li>
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No movies found.</p>
+  {% endif %}
+
+
+
+
+
+# Create your views here.
+# def home(request):
+#     theater = Theater.objects.all()
+#     return render(request, 'movie_sys/home.html', {'theaters': theater})
+
+
+# def home(request):
+#     theaters = Theater.objects.all()
+#     upcommings = Upcomming.objects.all()
+#     context = {
+#         'theaters': theaters,
+#         'upcommings': upcommings,
+#     }
+#     return render(request, 'movie_sys/home.html', context)
