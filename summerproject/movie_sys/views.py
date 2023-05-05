@@ -19,7 +19,7 @@ class MovieListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['upcommings'] = Upcomming.objects.all()
-        context['otts'] = Ott.objects.all()
+        context['ott_list'] = Ott.objects.all()
         return context
 
 
@@ -114,6 +114,13 @@ class MovieDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class OttListView(ListView):
     model = Ott
     template_name = 'movie_sys/ott_coll.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ott_list'] = Ott.objects.all()
+        return context
+
+
 class OttDetailView(DetailView):
     model = Ott
     template_name = 'movie_sys/ott_detail.html'  # replace with your actual template name

@@ -12,7 +12,30 @@
         {% endif %}
       </div>
       <h2 class="article-title">{{ object.title }}</h2>
-      <p class="article-content">{{ object.content }}</p>
+      <center>
+<video width="80%" height="60%" controls>
+  <source src="{{ ott.movie_video.url }}" type="video/mp4">
+</video>
+<!--      <button id="play-video">Play Video</button>-->
+</center>
+
     </div>
   </article>
 {% endblock content %}
+
+
+<!--
+{% block script %}
+
+<script>
+  const playButton = document.getElementById('play-video');
+  const videoPlayer = document.getElementById('video-player');
+
+  playButton.addEventListener('click', () => {
+    videoPlayer.autoplay = true;
+    videoPlayer.load();
+  });
+</script>
+
+
+{% endblock script %}-->

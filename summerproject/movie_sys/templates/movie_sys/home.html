@@ -41,9 +41,10 @@
   <h2 class="text-center my-5">Browse Movies</h2>
 <div class="gallery">
     <div class="row">
-        {% for theater in theaters %}
+        {% for ott in ott_list %}
         <div class="item col-md-3">
-          <a href="#">  <img src="{{ theater.logo.url }}" alt="{{ theater.theater_name }}" width="250px" height="300px"></a>
+          <a href="{% url 'ott_detail' pk=ott.pk %}">
+               <img src="{{ ott.poster.url }}" alt="{{ theater.theater_name }}" width="250px" height="300px"></a>
               <div>
 
             <a href="#" class="btn btn-primary">Add watch later</a>

@@ -1,16 +1,21 @@
 {% extends 'movie_sys/base.html'%}
 
 {% block content %}
-<p>hiiii</p>
-{% if ott %}
+
+{% if ott_list %}
 <div class="row">
-    {% for i in ott %}
-    <div class="md-5">
-        <img src="object.poster.urls" alt="object.title">
+    {% for ott in ott_list %}
+    <div class="col-md-2 ott_mov" style="border: 1px solid white;">
+<!--<a href="{% url 'ott_detail' pk=ott.pk %}">-->
+    <a href="{% url 'ott_detail' pk=ott.pk %}">
+ <img src="{{ ott.poster.url }}" alt="{{ ott.title }}" width="200px" height="250px">
+    <h2 style="font-size:25px;">{{ ott.title }}</h2>
+    <p>{{ ott.description }}</p>
+           </a>
+</div>
 
+{% endfor %}
 
-    </div>
-    {% endfor %}
 </div>
 {% endif %}
 {% endblock content %}
