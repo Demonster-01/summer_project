@@ -3,8 +3,9 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django_resized import ResizedImageField
 from django.contrib.auth.models import User
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.urls import reverse
+
 
 # Create your models here.
 
@@ -24,7 +25,6 @@ class Theater(models.Model):
         return self.theater_name
 
 
-
 class Movie(models.Model):
     # id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50, null=False)
@@ -35,9 +35,16 @@ class Movie(models.Model):
     directed_by = models.CharField(max_length=50, null=True)
     theater = models.ForeignKey(Theater, on_delete=models.CASCADE, null=True, related_name='movies')
     description = models.CharField(max_length=500, null=True)
+    booked_seats = models.ManyToManyField('Booking', blank=True)
+    promo_code = models.CharField(max_length=50, blank=True, null=True)
+    offer = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    ticket_price = models.IntegerField(validators=[MinValueValidator(1)], default=1)
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('movie_detail', kwargs={'pk': self.pk})
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -47,8 +54,6 @@ class Movie(models.Model):
             except Movie.DoesNotExist:
                 self.id = 1
         super().save(*args, **kwargs)
-
-
 
 
 class Upcomming(models.Model):
@@ -61,44 +66,55 @@ class Upcomming(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:  # object is being created
-            self.upload_by = self._meta.model.upload_by.field.related_model.objects.get(pk=1)  # replace 1 with the id of the desired user
+            self.upload_by = self._meta.model.upload_by.field.related_model.objects.get(
+                pk=1)  # replace 1 with the id of the desired user
         super().save(*args, **kwargs)
 
 
 class Ott(models.Model):
     title = models.CharField(max_length=50, null=False)
     poster = models.ImageField(default="default.jpg", upload_to='Ott_poster')
-    genre = models.CharField(max_length=50, null=True)
-    cast = models.CharField(max_length=200, null=True)
-    description = models.CharField(max_length=500)
+    genre = models.CharField(max_length=50, null=True, blank=True)
+    cast = models.CharField(max_length=200, null=True, blank=True)
+    description = models.CharField(max_length=500, blank=True)
+    movie_video = models.FileField(upload_to='ott_movie_videos/', null=False)
+    trailer_video = models.FileField(upload_to='ott_movie_trailer/', null=True, blank=True)
+    upload_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
-# class Booking(models.Model):
-#     pass
+    def get_absolute_url(self):
+        return reverse('ott_detail', kwargs={'pk': self.pk})
 
-# class Booking(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
-#     date = models.DateField()
-#     time = models.TimeField()
-#     seats = models.ManyToManyField(Seat)
+    def __str__(self):
+        return self.title
+
+
+
+
+    # def is_admin_user(self):
+    #     return self.user == User.objects.get(position='admin')
+    #
+    # class Meta:
+    #     permissions = [('can_view_ott', 'Can view Ott')]
+
+    # def save(self, *args, **kwargs):
+    #     if self.is_admin_user():
+    #         super().save(*args, **kwargs)
+    #     else:
+    #         raise Exception("You don't have permission to save this model.")
+
 
 class Booking(models.Model):
-    promo_code = models.CharField(max_length=50, blank=True, null=True)
-    offer = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    no_of_rows = models.IntegerField(default=1) #no of seat to be
-    ticket_price = models.IntegerField(validators=[MinValueValidator(1)], default=1)
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='booking', default=" ")
+    seat_no = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    purchase_time = models.DateTimeField(auto_now_add=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.user:
+            self.name = self.user.get_full_name()
+            self.email = self.user.email
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'Booking - {self.pk}'
-
-
-class Seat(models.Model):
-    theater = models.ForeignKey('Theater', on_delete=models.CASCADE, related_name='seats')
-    row = models.PositiveIntegerField(_('Row Number'))
-    column = models.PositiveIntegerField(_('Column Number'))
-    is_booked = models.BooleanField(_('Is Booked'), default=False)
-
-    def __str__(self):
-        return f'{self.theater} - Row {self.row}, Column {self.column}'
+        return f"{self.email} purchased oon  {self.purchase_time}"

@@ -1,0 +1,32 @@
+{% extends 'movie_sys/base.html' %}
+
+{% block content %}
+
+<h1>{{ theater.theater_name }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <table>
+        {% for row in theater.seats.all|groupby:"seat_row" %}
+        <tr>
+            {% for seat in row.1 %}
+            {% if seat.is_booked %}
+            <td class="booked" id="{{ seat.seat_row }}-{{ seat.seat_column }}">X</td>
+            {% else %}
+            <td class="available" id="{{ seat.seat_row }}-{{ seat.seat_column }}">
+                <input type="checkbox" name="seat" value="{{ seat.seat_row }}-{{ seat.seat_column }}">
+            </td>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <br>
+
+    <button type="submit">Book Selected Seats</button>
+</form>
+
+{% endblock %}
+

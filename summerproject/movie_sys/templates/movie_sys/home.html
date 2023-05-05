@@ -45,7 +45,6 @@
         <div class="item col-md-3">
           <a href="#">  <img src="{{ theater.logo.url }}" alt="{{ theater.theater_name }}" width="250px" height="300px"></a>
               <div>
-            <a href="#" class="btn btn-primary">Watch</a>
 
             <a href="#" class="btn btn-primary">Add watch later</a>
        </div>
@@ -54,6 +53,7 @@
         {% endfor %}
     </div>
 </div>
+ <a href="{% url 'movie_sys-ott_collection' %}" class="btn btn-primary">Explore More</a>
 <hr>
 
 

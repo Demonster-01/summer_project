@@ -5,42 +5,55 @@
 <hr style="color: white">
 <h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
 
-<div class="seat_pay">
-  <div class="seat">
-    <table>
-      <tbody>
-        <tr>
-          <td></td>
-          {% for col in cols %}
-            <td>{{ col }} C</td>
-          {% endfor %}
-        </tr>
-        {% for row in rows %}
-          <tr>
-            <td>{{ row }} R</td>
-            {% for col in cols %}
-              <td><input type="checkbox" class="seat_box" name="seat" value="{{ row }}-{{ col }}"></td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <span>->->->->->->->->->Screen here-<-<-<-<-<-<-<-<-</span>
-  </div>
-  <div class="pay">
-    <h1>payment</h1>
-    <form method="post" action="#">
-    <input type="text" placeholder="offer/ promo" id="promo"><br>
-    <input type="checkbox" class="check" id="check" value=" ">
-    <label for="check"> I accept all the terms and conditions</label><br>
-    <p>Selected Seats:</p>
-    <ul id="selected_seats_list"></ul>
+<form method="POST">
+    {% csrf_token %}
+    <div class="seat_pay">
+        <div class="seat">
+            <table>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        {% for col in cols %}
+                            <td>{{ col }} C</td>
+                        {% endfor %}
+                    </tr>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{ row }} R</td>
+                            {% for col in cols %}
+                                <td>
+                                    <input type="checkbox" class="seat_box" name="seat" value="{{ row }}-{{ col }}" data-price=10>
 
-    <button type="button" class="btn btn-success">Pay</button>
-    </form>
-  </div>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>Ticket Price: {{ ticket_price }}</p>
+
+
+
+            <span>->->->->->->->->->Screen here-<-<-<-<-<-<-<-<-</span>
+        </div>
+        <div class="pay">
+            <h1>Payment</h1>
+            <input type="text" placeholder="Offer/Promo" id="promo"><br>
+            <input type="checkbox" class="check" id="check" value=" ">
+            <label for="check">I accept all the terms and conditions</label><br>
+            <p>Selected Seats:</p>
+            <ul id="selected_seats_list"></ul>
+            <div>
+  <p id="total_price"></p>
 </div>
+
+            <button type="button" class="btn btn-success" id="pay_button" disabled>Pay</button>
+        </div>
+    </div>
+</form>
 {% endblock %}
+
+
 
 {% block script %}
 <script>
@@ -49,6 +62,17 @@
 
   // Get all the seat checkboxes
   var seatBoxes = document.getElementsByClassName("seat_box");
+
+  // Get the ticket price
+  var ticketPrice = 10.0;
+
+
+
+  // Get the offer value (if any)
+  var offer = "{{ booking.offer }}";
+  if (offer === "") {
+    offer = 0;
+  }
 
   // Loop through the checkboxes and add a change listener
   for (var i = 0; i < seatBoxes.length; i++) {
@@ -69,7 +93,14 @@
       var numSelectedSeats = selectedSeats.length;
       var selectedSeatsMessage = numSelectedSeats + " seat(s) selected: " + selectedSeats.join(", ");
       selectedSeatsList.textContent = selectedSeatsMessage;
+
+      // Calculate the total price based on the selected seats and the ticket price
+      var totalPrice = numSelectedSeats * ticketPrice * (1 - offer/100);
+      var priceMessage = "Total price: " + totalPrice.toFixed(2) + " EUR";
+      document.getElementById("total_price").textContent = priceMessage;
     });
   }
 </script>
+
 {% endblock %}
+

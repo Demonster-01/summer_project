@@ -1,0 +1,16 @@
+{% extends 'movie_sys/base.html'%}
+
+{% block content %}
+<p>hiiii</p>
+{% if ott %}
+<div class="row">
+    {% for i in ott %}
+    <div class="md-5">
+        <img src="object.poster.urls" alt="object.title">
+
+
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock content %}

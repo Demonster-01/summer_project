@@ -102,7 +102,9 @@ hr{
 
 
 
-
+.seat-selected {
+    background-color: red; /* Change this to your desired color */
+}
 
 
 
@@ -184,6 +186,20 @@ table.coll_table td {
   border-left: solid 2px white;
   padding-left: 5% ;
 }
+.coll {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.poster {
+  margin-right: 20px;
+  text-align: center;
+}
+.detailss {
+  flex-grow: 1;
+}
+
 
 
 
