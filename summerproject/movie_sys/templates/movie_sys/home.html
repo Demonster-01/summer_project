@@ -2,16 +2,19 @@
 
 {% extends "movie_sys/base.html" %}
 
+{% block title %} Home {% endblock %}
 {% block content %}
-    <h2>Theater</h2>
+    <center><h2>Movie ticket booking</h2></center>
 <div class="gallery">
     <div class="row">
         {% for theater in theaters %}
         <div class="item col-md-3">
-            <img src="{{ theater.logo.url }}" alt="{{ theater.name }}" width="250px" height="300px">
-            <div class="details">
+            <img src="{{ theater.logo.url }}" alt="{{ theater.name }}" width="300px" height="300px">
+            <div class="details" style="width: 100%;">
+                <div class="text-center">
             <kbd style="font-size: 20px">{{ theater.theater_name }}</kbd>
                 <a href="{% url 'movie_sys-movie_coll' theater.id %}" class="btn btn-primary">Visit</a>
+            </div>
             </div>
         </div>
         {% endfor %}
@@ -24,9 +27,9 @@
   <div class="gallery">
     {% for upcomming in upcommings %}
       <div class="upcomming_item">
-        <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="200px" height="200px" >
+        <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="300px" height="200px" >
         <div class="details">
-          <h2>{{ upcomming.title }}</h2>
+          <h2 class="upcomming_head">{{ upcomming.title }}</h2>
           <p><strong>Genre:</strong> {{ upcomming.genre }}</p>
           <p><strong>Cast:</strong> {{ upcomming.cast }}</p>
           <p><strong>Directed By:</strong> {{ upcomming.directed_by }}</p>
@@ -39,12 +42,12 @@
 <hr>
 
   <h2 class="text-center my-5">Browse Movies</h2>
-<div class="gallery">
+<div class="gallery"    >
     <div class="row">
         {% for ott in ott_list %}
         <div class="item col-md-3">
           <a href="{% url 'ott_detail' pk=ott.pk %}">
-               <img src="{{ ott.poster.url }}" alt="{{ theater.theater_name }}" width="250px" height="300px"></a>
+               <img src="{{ ott.poster.url }}" alt="{{ theater.theater_name }}" width="300px" height="300px"></a>
               <div>
 
             <a href="#" class="btn btn-primary">Add watch later</a>

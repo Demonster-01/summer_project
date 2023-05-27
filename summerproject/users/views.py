@@ -1,9 +1,13 @@
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
+
 from django.contrib.auth.decorators import login_required
+from .models import User, Profile, Theater
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from django.views.decorators.csrf import csrf_protect
 
+from django import forms
 
 
 @csrf_protect
@@ -25,15 +29,12 @@ def register(request):
 def profile(request):
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileUpdateForm(request.POST,
-                                   request.FILES,
-                                   instance=request.user.profile)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, f'Your account has been updated!')
+            messages.success(request, 'Your account has been updated!')
             return redirect('profile')
-
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
@@ -44,3 +45,17 @@ def profile(request):
     }
 
     return render(request, 'users/profile.html', context)
+
+def search(request):
+    # profiles=Profile.objects.all()
+    query=request.GET['query']
+    profiles = Profile.objects.filter(user__email__icontains=query)
+    params={'profiles': profiles}
+    print("hi")
+    return render(request,'users/search.html',params)
+
+def clean_email(self):
+    data= self.cleaned_data['email']
+    if User.objects.filter(email=data).exists():
+        raise forms.ValidationError("this email is already used.")
+    return data

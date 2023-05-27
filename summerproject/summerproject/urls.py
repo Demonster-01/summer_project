@@ -20,6 +20,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
 
+from users.forms import UserUpdateView
+
+from users import views
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include('movie_sys.urls')),
@@ -48,6 +52,9 @@ urlpatterns = [
          ),
          name='password_reset_complete'),
     path('', include('movie_sys.urls')),
+
+    path('user/<int:pk>/update/', UserUpdateView.as_view(), name='user-update'),
+    path('search/',views.search,name='search')
 ]
 
 if settings.DEBUG:

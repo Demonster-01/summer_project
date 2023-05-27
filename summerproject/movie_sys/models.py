@@ -1,3 +1,5 @@
+from datetime import time
+
 from PIL.Image import Image
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -17,6 +19,7 @@ class Theater(models.Model):
     no_of_seat_rows = models.IntegerField(default=10)
     num_of_seats_column = models.IntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
+    contact = models.IntegerField(default=9807654321, blank=False,null=False)
 
     class Meta:
         unique_together = ('theater_name', 'location')
@@ -30,15 +33,29 @@ class Movie(models.Model):
     title = models.CharField(max_length=50, null=False)
     poster = models.ImageField(default="default.jpg", upload_to='movie_poster')
     releasing_date = models.DateField()
+    screening_time = models.TimeField(default=time(hour=1, minute=20))
     genre = models.CharField(max_length=50, null=True)
     cast = models.CharField(max_length=200, null=True)
     directed_by = models.CharField(max_length=50, null=True)
-    theater = models.ForeignKey(Theater, on_delete=models.CASCADE, null=True, related_name='movies')
+    theater = models.ForeignKey(Theater, on_delete=models.CASCADE, null=False, related_name='movies')
     description = models.CharField(max_length=500, null=True)
-    booked_seats = models.ManyToManyField('Booking', blank=True)
+    # booked_seats = models.ManyToManyField('Booking', blank=True)
     promo_code = models.CharField(max_length=50, blank=True, null=True)
     offer = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     ticket_price = models.IntegerField(validators=[MinValueValidator(1)], default=1)
+    reserved_seats = models.JSONField(blank=True, null=True)
+
+    # ... other fields and methods ...
+
+    def reserve_seat(self, row, col):
+        if self.reserved_seats is None:
+            self.reserved_seats = []
+        self.reserved_seats.append((row, col))
+        self.save()
+    def get_reserved_seats(self):
+        return self.reserved_seats if self.reserved_seats else []
+    def get_formatted_screening_time(self):
+        return self.screening_time.strftime("%H:%M")
 
     def __str__(self):
         return self.title
@@ -71,6 +88,24 @@ class Upcomming(models.Model):
         super().save(*args, **kwargs)
 
 
+
+class Booking(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    purchase_time = models.DateTimeField(auto_now_add=True, null=True)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, default=1)
+    seat_row = models.CharField(max_length=5, default=0)
+    seat_column = models.CharField(max_length=5, default=0)
+
+    def __str__(self):
+        return f"Booking for {self.movie.title} - Seat {self.seat_row}-{self.seat_column}"
+
+
+
+
+
+
+
+
 class Ott(models.Model):
     title = models.CharField(max_length=50, null=False)
     poster = models.ImageField(default="default.jpg", upload_to='Ott_poster')
@@ -80,6 +115,7 @@ class Ott(models.Model):
     movie_video = models.FileField(upload_to='ott_movie_videos/', null=False)
     trailer_video = models.FileField(upload_to='ott_movie_trailer/', null=True, blank=True)
     upload_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    date_posted = models.DateTimeField(default=timezone.now)
 
     def get_absolute_url(self):
         return reverse('ott_detail', kwargs={'pk': self.pk})
@@ -89,32 +125,3 @@ class Ott(models.Model):
 
 
 
-
-    # def is_admin_user(self):
-    #     return self.user == User.objects.get(position='admin')
-    #
-    # class Meta:
-    #     permissions = [('can_view_ott', 'Can view Ott')]
-
-    # def save(self, *args, **kwargs):
-    #     if self.is_admin_user():
-    #         super().save(*args, **kwargs)
-    #     else:
-    #         raise Exception("You don't have permission to save this model.")
-
-
-class Booking(models.Model):
-    seat_no = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    purchase_time = models.DateTimeField(auto_now_add=True, null=True)
-    name = models.CharField(max_length=100, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-
-    def save(self, *args, **kwargs):
-        if self.user:
-            self.name = self.user.get_full_name()
-            self.email = self.user.email
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.email} purchased oon  {self.purchase_time}"

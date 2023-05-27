@@ -17,11 +17,9 @@
     <link rel="stylesheet" type="text/css" href="{% static 'movie_sys/main.css' %}">
 
 
-    {% if title %}
-    <title>Django movie_sys - {{ title }}</title>
-    {% else %}
-    <title>Django movie_sys</title>
-    {% endif %}
+
+    <title>{% block title%} {% endblock %}</title>
+
 </head>
 <body>
 <header class="site-header">
@@ -40,14 +38,27 @@
                 <!-- Navbar Right Side -->
                 <div class="navbar-nav">
                     {% if user.is_authenticated %}
+                    {% if user.profile.role == 'admin' or user.profile.role == 'manager' %}
+                    <a class="nav-item nav-link" href="{% url 'theater-create' %}">create theater</a>
+                    {% endif %}
+                    {% if user.profile.role == 'admin' %}
+<!--                    <a class="nav-item nav-link" href="{% url 'user-update' user.pk %}">edit user</a>-->
+                    <form method="get" action="/search" class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" type="search" name="query" placeholder="search: user@gmail.com" id="query">
+                           </form>
+                    {% endif %}
+
                     <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
                     <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+
+
                     {% else %}
                     <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
                     <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
                     {% endif %}
                 </div>
             </div>
+        </div>
     </nav>
 </header>
 
@@ -100,12 +111,12 @@
 
         {% block script %}
         {% endblock %}
-
+    </div>
 
 </footer>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="{% static 'movie_sys/backend.js' %}" ></script>
+<script src="{% static 'movie_sys/backend.js' %}"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
