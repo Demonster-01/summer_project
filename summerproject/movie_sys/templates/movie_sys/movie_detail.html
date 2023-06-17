@@ -6,7 +6,25 @@
 <center><h1>{{ object.theater.theater_name }}</h1></center>
 <hr style="color: white">
 <h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
-<h6 style="color: #d4fff7">Screening time: {{ object.get_formatted_screening_time }}
+<h6 style="color: #d4fff7">Screening time: {{ object.screening_datetime|date:'H:i' }}
+
+
+<p>Current time: {{ current_time }}</p>
+    <p>Current time: <span id="current-time"></span></p>
+
+<script>
+function updateCurrentTime() {
+    var currentTimeElement = document.getElementById('current-time');
+    var currentTime = new Date().toLocaleTimeString();
+    currentTimeElement.innerHTML = currentTime;
+}
+
+// Update the current time initially
+updateCurrentTime();
+
+// Update the current time every second (adjust the interval as needed)
+setInterval(updateCurrentTime, 1000);
+</script>
 
 <center>
             <input type="checkbox" class="seat_box" disabled style="background-color: red;">= reserved can't choose

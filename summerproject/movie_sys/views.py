@@ -1,6 +1,9 @@
+import csv
 import json
+from datetime import timezone, datetime, timedelta
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView)
@@ -9,11 +12,7 @@ from pyexpat.errors import messages
 from .models import Movie, Theater, Upcomming, Booking, Ott
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.decorators import method_decorator
 
 from users.models import Profile, User
 
@@ -115,18 +114,56 @@ class MoviecollListView(ListView):
 
 
 
+# from datetime import datetime
 
+from django.utils import timezone
 
 class MovieDetailView(DetailView):
     model = Movie
     template_name = 'movie_sys/movie_detail.html'
+
+    def check_screening_time(self):
+        current_time = timezone.localtime()
+        screening_time = timezone.localtime(self.object.screening_datetime)
+
+        screening_time = screening_time.replace(second=0, microsecond=0)
+
+        if current_time > screening_time:
+            # Perform actions when screening time has passed
+            print("The screening time has passed.")
+            # self.export_to_csv('old_booking_data.csv')
+            # Booking.objects.all().delete()
+        else:
+            # Perform actions when screening time has not passed
+            print("The screening time has not passed yet.")
+    def export_to_csv(self, filename):
+        bookings = Booking.objects.all()
+        field_names = ['id', 'movie', 'seat_row', 'seat_column', 'user']
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=field_names)
+            writer.writeheader()
+            for booking in bookings:
+                writer.writerow({
+                    'id': booking.id,
+                    'movie': booking.movie.title,
+                    'seat_row': booking.seat_row,
+                    'seat_column': booking.seat_column,
+                    'user': booking.user,
+                    'email': booking.user.email,
+                })
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['rows'] = range(1, self.object.theater.no_of_seat_rows + 1)
         context['cols'] = range(1, self.object.theater.num_of_seats_column + 1)
         context['bookings'] = Booking.objects.all()
+        context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
+
+        self.check_screening_time()  # Call the method to check screening time
+
         return context
+
+
 
 
 
@@ -259,6 +296,7 @@ class TheaterCreateView(LoginRequiredMixin, CreateView):
 
 
 
+from django.contrib import messages
 
 
 @login_required(login_url='login')  # Add this decorator to require authentication
@@ -266,23 +304,52 @@ def process_bookings(request, pk):
     if request.method == 'POST':
         selected_seats = request.POST.getlist('seat')
         movie = get_object_or_404(Movie, pk=pk)
-        user = request.user if request.user.is_authenticated else None
+        user = request.user
 
         if user is None:
             # User is not logged in, redirect to the login page
             messages.warning(request, 'Please login to proceed with the booking.')
             return redirect('login')
 
+        current_datetime = datetime.now()
+        current_date = current_datetime.date()
+
+        screening_date = movie.releasing_date
+        screening_time = movie.screening_datetime.time() if movie.screening_datetime else time.min
+
+        screening_datetime = datetime.combine(screening_date, screening_time)
+        current_datetime_combined = datetime.combine(current_date, current_datetime.time())
+
+        if current_datetime_combined > screening_datetime:
+            messages.warning(request, 'The screening time has passed. Booking is not available.')
+            return redirect('movie_detail', pk=pk)
+
         for seat in selected_seats:
-            print(seat)
             row = seat[0]
             col = seat[1]
-            booking = Booking(movie=movie, seat_row=row, seat_column=col, user=user)
-            booking.save()
+            # Save the booking data to a CSV file
+            save_booking_data(movie, row, col, user)
+
+        messages.success(request, 'Booking successful! Enjoy the movie.')
 
     return redirect('movie_detail', pk=pk)
 
 
+def is_screening_time_passed(current_time, screening_time):
+    return current_time > screening_time
+
+
+def save_booking_data(movie, row, col, user):
+    # Define the file path where the booking data will be saved
+    file_path = 'booking_data.csv'
+
+    # Create a new row with the booking data
+    booking_data = [str(movie.pk), movie.title, row, col, str(user.pk), user.username]
+
+    # Write the booking data to the CSV file
+    with open(file_path, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(booking_data)
 
 
 
@@ -313,3 +380,5 @@ def process_bookings(request, pk):
 #     # Perform any other necessary actions or return a response
 #     return HttpResponse("Dataset reset/creation completed.")
 #
+
+

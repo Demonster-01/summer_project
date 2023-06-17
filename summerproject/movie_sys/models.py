@@ -33,7 +33,9 @@ class Movie(models.Model):
     title = models.CharField(max_length=50, null=False)
     poster = models.ImageField(default="default.jpg", upload_to='movie_poster')
     releasing_date = models.DateField()
-    screening_time = models.TimeField(default=time(hour=1, minute=20))
+    screening_datetime = models.DateTimeField(
+        default=timezone.now().replace(hour=13, minute=0, second=0, microsecond=0))
+
     genre = models.CharField(max_length=50, null=True)
     cast = models.CharField(max_length=200, null=True)
     directed_by = models.CharField(max_length=50, null=True)
@@ -94,6 +96,7 @@ class Booking(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, default=1)
     seat_row = models.CharField(max_length=5, default=0)
     seat_column = models.CharField(max_length=5, default=0)
+    # status = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Booking for {self.movie.title} - Seat {self.seat_row}-{self.seat_column}"
