@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import time, datetime
 
 from PIL.Image import Image
 from django.core.validators import MinValueValidator
@@ -7,7 +7,7 @@ from django_resized import ResizedImageField
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.urls import reverse
-
+import datetime
 
 # Create your models here.
 
@@ -44,7 +44,6 @@ class Movie(models.Model):
     offer = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     ticket_price = models.IntegerField(validators=[MinValueValidator(1)], default=1)
     reserved_seats = models.JSONField(blank=True, null=True)
-
     # ... other fields and methods ...
 
     def reserve_seat(self, row, col):
@@ -125,3 +124,7 @@ class Ott(models.Model):
 
 
 
+
+def is_screening_time_passed(screening_time):
+    current_time = datetime.now().time()
+    return current_time > screening_time

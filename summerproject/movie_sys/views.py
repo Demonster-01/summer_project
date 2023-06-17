@@ -281,3 +281,35 @@ def process_bookings(request, pk):
             booking.save()
 
     return redirect('movie_detail', pk=pk)
+
+
+
+
+
+
+
+
+#
+# from datetime import datetime
+# from .models import Screening, Dataset
+# from .utils import is_screening_time_passed
+#
+# def reset_or_create_dataset(request):
+#     screenings = Screening.objects.all()
+#
+#     for screening in screenings:
+#         if is_screening_time_passed(screening.screening_time):
+#             # Reset or create new dataset for this screening
+#             # Perform the necessary actions based on your requirements
+#             # Example:
+#             screening.dataset_set.all().delete()  # Delete existing related datasets
+#
+#             # Create new dataset instances
+#             new_dataset1 = Dataset(screening=screening, ...)
+#             new_dataset1.save()
+#             new_dataset2 = Dataset(screening=screening, ...)
+#             new_dataset2.save()
+#
+#     # Perform any other necessary actions or return a response
+#     return HttpResponse("Dataset reset/creation completed.")
+#

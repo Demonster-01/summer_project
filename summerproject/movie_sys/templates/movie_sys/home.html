@@ -9,10 +9,11 @@
     <div class="row">
         {% for theater in theaters %}
         <div class="item col-md-3">
-            <img src="{{ theater.logo.url }}" alt="{{ theater.name }}" width="300px" height="300px">
+            <a href="{% url 'movie_sys-movie_coll' theater.id %}">
+            <img src="{{ theater.logo.url }}" alt="{{ theater.name }}" width="300px" height="300px"></a>
             <div class="details" style="width: 100%;">
                 <div class="text-center">
-            <kbd style="font-size: 20px">{{ theater.theater_name }}</kbd>
+            <h6 style="font-size: 20px">{{ theater.theater_name }}</h6>
                 <a href="{% url 'movie_sys-movie_coll' theater.id %}" class="btn btn-primary">Visit</a>
             </div>
             </div>
@@ -27,7 +28,7 @@
   <div class="gallery">
     {% for upcomming in upcommings %}
       <div class="upcomming_item">
-        <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="300px" height="200px" >
+        <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="300px" height="400px" >
         <div class="details">
           <h2 class="upcomming_head">{{ upcomming.title }}</h2>
           <p><strong>Genre:</strong> {{ upcomming.genre }}</p>

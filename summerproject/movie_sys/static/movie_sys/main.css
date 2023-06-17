@@ -1,5 +1,6 @@
 body {
   background:#404040;
+  background-image: linear-gradient();
   color: #d9d9d9;
   margin-top: 70px;
   margin-left: 30px;
@@ -26,6 +27,9 @@ hr{
   color: white;
 }
 
+/*movie box*/
+
+
 
 .gallery {
   display: grid;
@@ -37,16 +41,23 @@ hr{
 }
 
 
+.item img{
+  width: 100%;
+  border-radius: 20px;
+
+}
+
 
 .item {
   width: 300px; /* adjust as needed */
   clear: both;
   margin-bottom: 30px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.2);
-  border-radius: 5px;
+  box-shadow: 0 0 8px rgb(255, 255, 255);
+  border-radius: 15px;
   overflow: hidden;
   display: inline-block;
   margin: 10px;
+  padding: 15px;
 }
 
 .item img {
@@ -92,9 +103,8 @@ hr{
 
 
 
-
-.seat-selected {
-    background-color: red; /* Change this to your desired color */
+input[type="checkbox"]:disabled {
+  background-color: red;
 }
 
 

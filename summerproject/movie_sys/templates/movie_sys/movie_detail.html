@@ -1,11 +1,19 @@
 {% extends "movie_sys/base.html" %}
 
 {% block content %}
+
+
 <center><h1>{{ object.theater.theater_name }}</h1></center>
 <hr style="color: white">
-<h2 style="color: #d4fff7">Movie: {{ object.title }}</h2><h6 style="color: #d4fff7">Screening time: {{ object.get_formatted_screening_time }}</h6>
+<h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
+<h6 style="color: #d4fff7">Screening time: {{ object.get_formatted_screening_time }}
 
-
+<center>
+            <input type="checkbox" class="seat_box" disabled style="background-color: red;">= reserved can't choose
+            <input type="checkbox" class="seat_box" disabled style="background-color: green;">= your selection
+            <input type="checkbox" class="seat_box" disabled style="background-color: #404040;">= empty
+</center></h6>
+<hr>
 <ul>
 {% for booking in bookings %}
 <li>{{ booking.seat_column }}{{ booking.seat_row }}</li>
