@@ -3,7 +3,8 @@
 {% block content %}
 
 
-<h1><center>{{ object.theater.theater_name }}</center></h1>
+<center><h1>{{ object.theater.theater_name }}</h1></center>
+
 
 <hr style="color: white">
 <h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
@@ -11,12 +12,12 @@
 <div class="timing">
     <a href="{% url 'movie_detail' movie.pk %}" style="color: #d4fff7">
         <div class="times">
-            now: &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
+            &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
         </div>
     </a>
     <a href="{% url 'movie_detail_2' movie.pk %}" style="color: #d4fff7">
         <div class="times">
-            &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
+            now: &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
         </div>
     </a>
     <a href="{% url 'movie_detail_3' movie.pk %}" style="color: #d4fff7">
@@ -27,6 +28,7 @@
 </div>
 <!--<p>Current time: {{ current_time }}</p>-->
 <p>Current time: <span id="current-time"></span></p>
+
 
 <script>
 function updateCurrentTime() {
@@ -41,15 +43,13 @@ updateCurrentTime();
 // Update the current time every second (adjust the interval as needed)
 setInterval(updateCurrentTime, 1000);
 
-
 </script>
-        <div class="seat_symbol">
+
 <center>
     <input type="checkbox" class="seat_box" disabled style="background-color: red;">= reserved can't choose
     <input type="checkbox" class="seat_box" disabled style="background-color: green;">= your selection
     <input type="checkbox" class="seat_box" disabled style="background-color: #404040;">= empty
-</center>
-        </div>
+</center></h6>
 <hr>
 {% if messages %}
 <ul class="messages">
@@ -59,13 +59,13 @@ setInterval(updateCurrentTime, 1000);
 </ul>
 {% endif %}
 <ul>
-    {% for booking in bookings %}
+    {% for booking in bookings2 %}
     <li>{{ booking.seat_column }}{{ booking.seat_row }}</li>
     {% endfor %}
 </ul>
 
 
-<form action="{% url 'process_bookings' pk=movie.id %}" method="post">
+<form action="{% url 'process_bookings2' pk=movie.id %}" method="post">
     {% csrf_token %}
     <div class="seat_pay">
         <div class="seat">
@@ -98,7 +98,7 @@ setInterval(updateCurrentTime, 1000);
                 </tbody>
             </table>
 
-            <span>->->->->->->->>->->->->->->Screen here-<-<-<-<-<-<-<-<-<-<-<-<-</span>
+            <span>->->->->->->->->->Screen here-<-<-<-<-<-<-<-<-</span>
         </div>
         <div class="pay">
             <h1>Payment</h1>
@@ -112,7 +112,7 @@ setInterval(updateCurrentTime, 1000);
             </div>
 
 
-            <button class="btn btn-success" type="submit">Submit</button>
+            <button type="submit">Submit</button>
         </div>
     </div>
 </form>
@@ -120,92 +120,6 @@ setInterval(updateCurrentTime, 1000);
 
 
 {% block script %}
-
-
-<script>
-    const all_seats = document.querySelectorAll('.row .seat');
-    const cta_btn = document.querySelector('button.purchase_btn');
-
-    async function contactAPI(url, body) {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-
-        return response.json();
-    }
-
-    function refreshSeat() {
-        const movieSelect = document.querySelector('#movieSelect');
-        const movie_title = movieSelect.options[movieSelect.selectedIndex].id;
-
-        contactAPI("/occupied/", { movie_title }).then(data => {
-            const occupied_seat = data['occupied_seats'];
-            const movie_title = data["movie_title"];
-
-            const seat_LocalStorage = localStorage.getItem('selectedSeats') ? JSON.parse(localStorage.getItem('selectedSeats')) : null;
-            const movie_index = localStorage.getItem("selectedMovieIndex");
-
-            all_seats.forEach(seat => {
-                seat.classList.remove("occupied");
-            });
-
-            const LS_movie = movieSelect.options[movie_index].textContent;
-
-            if (LS_movie === movie_title) {
-                if (occupied_seat !== null && occupied_seat.length > 0) {
-                    all_seats.forEach((seat, index) => {
-                        if (occupied_seat.includes(index)) {
-                            seat.classList.add('occupied');
-                            seat.classList.remove('selected');
-                        }
-                    });
-                }
-
-                if (seat_LocalStorage !== null) {
-                    seat_LocalStorage.forEach((seat, index) => {
-                        if (occupied_seat.includes(seat)) {
-                            seat_LocalStorage.splice(index, 1);
-                            localStorage.setItem("selectedSeats", JSON.stringify(seat_LocalStorage));
-                        }
-                    });
-                }
-            }
-            updateSelectedCount();
-        });
-    }
-
-    refreshSeat();
-
-    cta_btn.addEventListener("click", e => {
-        const movieSelect = document.querySelector('#movieSelect');
-        const movie_title = movieSelect.options[movieSelect.selectedIndex].id;
-        const seat_list = JSON.parse(localStorage.getItem("selectedSeats"));
-
-        if (seat_list !== null && seat_list.length > 0) {
-            const data = {
-                movie_title,
-                seat_list
-            };
-
-            contactAPI("/payment/", data).then(res => {
-                if (res["payment_url"]) {
-                    // Redirect the customer
-                    window.location.href = res["payment_url"];
-                } else {
-                    console.log('error');
-                }
-            }).catch(e => {
-                console.log(e);
-            });
-        }
-    });
-
-
-</script>
 
 
 <script>
@@ -246,14 +160,14 @@ setInterval(updateCurrentTime, 1000);
 
             // Calculate the total price based on the selected seats and the ticket price
             var totalPrice = numSelectedSeats * ticketPrice * (1 - offer / 100);
-            var priceMessage = "Total price: " + totalPrice.toFixed(2) + " EUR";
+            var priceMessage = "Total price: NRS " + totalPrice.toFixed(2);
             document.getElementById("total_price").textContent = priceMessage;
         });
     }
 
     // Disable checkboxes for booked seats
 var bookedSeats = [
-    {% for booking in bookings %}
+    {% for booking in bookings2 %}
         "{{ booking.seat_row }}{{ booking.seat_column }}",
     {% endfor %}
 ].map(seat => seat.replace('-', ''));
@@ -265,7 +179,6 @@ var bookedSeats = [
             seatBoxes[i].disabled = true;
         }
     }
-
 
 </script>
 {% endblock %}

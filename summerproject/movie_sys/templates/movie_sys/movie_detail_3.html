@@ -3,7 +3,8 @@
 {% block content %}
 
 
-<h1><center>{{ object.theater.theater_name }}</center></h1>
+<center><h1>{{ object.theater.theater_name }}</h1></center>
+
 
 <hr style="color: white">
 <h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
@@ -11,7 +12,7 @@
 <div class="timing">
     <a href="{% url 'movie_detail' movie.pk %}" style="color: #d4fff7">
         <div class="times">
-            now: &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
+            &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
         </div>
     </a>
     <a href="{% url 'movie_detail_2' movie.pk %}" style="color: #d4fff7">
@@ -21,12 +22,13 @@
     </a>
     <a href="{% url 'movie_detail_3' movie.pk %}" style="color: #d4fff7">
         <div class="times">
-            &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
+            now: &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
         </div>
     </a>
 </div>
 <!--<p>Current time: {{ current_time }}</p>-->
 <p>Current time: <span id="current-time"></span></p>
+
 
 <script>
 function updateCurrentTime() {
@@ -41,15 +43,13 @@ updateCurrentTime();
 // Update the current time every second (adjust the interval as needed)
 setInterval(updateCurrentTime, 1000);
 
-
 </script>
-        <div class="seat_symbol">
+
 <center>
     <input type="checkbox" class="seat_box" disabled style="background-color: red;">= reserved can't choose
     <input type="checkbox" class="seat_box" disabled style="background-color: green;">= your selection
     <input type="checkbox" class="seat_box" disabled style="background-color: #404040;">= empty
-</center>
-        </div>
+</center></h6>
 <hr>
 {% if messages %}
 <ul class="messages">
@@ -59,13 +59,13 @@ setInterval(updateCurrentTime, 1000);
 </ul>
 {% endif %}
 <ul>
-    {% for booking in bookings %}
+    {% for booking in bookings3 %}
     <li>{{ booking.seat_column }}{{ booking.seat_row }}</li>
     {% endfor %}
 </ul>
 
 
-<form action="{% url 'process_bookings' pk=movie.id %}" method="post">
+<form action="{% url 'process_bookings3' pk=movie.id %}" method="post">
     {% csrf_token %}
     <div class="seat_pay">
         <div class="seat">
@@ -98,7 +98,7 @@ setInterval(updateCurrentTime, 1000);
                 </tbody>
             </table>
 
-            <span>->->->->->->->>->->->->->->Screen here-<-<-<-<-<-<-<-<-<-<-<-<-</span>
+            <span>->->->->->->->->->Screen here-<-<-<-<-<-<-<-<-</span>
         </div>
         <div class="pay">
             <h1>Payment</h1>
@@ -112,7 +112,7 @@ setInterval(updateCurrentTime, 1000);
             </div>
 
 
-            <button class="btn btn-success" type="submit">Submit</button>
+            <button type="submit">Submit</button>
         </div>
     </div>
 </form>
@@ -204,7 +204,6 @@ setInterval(updateCurrentTime, 1000);
         }
     });
 
-
 </script>
 
 
@@ -253,7 +252,7 @@ setInterval(updateCurrentTime, 1000);
 
     // Disable checkboxes for booked seats
 var bookedSeats = [
-    {% for booking in bookings %}
+    {% for booking in bookings3 %}
         "{{ booking.seat_row }}{{ booking.seat_column }}",
     {% endfor %}
 ].map(seat => seat.replace('-', ''));
@@ -265,7 +264,6 @@ var bookedSeats = [
             seatBoxes[i].disabled = true;
         }
     }
-
 
 </script>
 {% endblock %}

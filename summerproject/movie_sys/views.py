@@ -1,15 +1,15 @@
 import csv
 import json
-from datetime import timezone, datetime, timedelta
-
+from datetime import timezone, datetime
+import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView)
 from pyexpat.errors import messages
-
-from .models import Movie, Theater, Upcomming, Booking, Ott
+from django.utils import timezone
+from .models import Movie, Theater, Upcomming, Booking, Ott, Booking2, Booking3
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -19,7 +19,7 @@ from users.models import Profile, User
 
 class MovieListView(ListView):
     model = Theater
-    template_name = 'movie_sys/home.html'  # <app>/<model>_<viewtype>.html
+    template_name = 'movie_sys/home.html'
     context_object_name = 'theaters'
     paginate_by = 10
 
@@ -109,15 +109,6 @@ class MoviecollListView(ListView):
 #         context['cols'] = range(1, self.object.theater.num_of_seats_column + 1)
 #         return context
 
-
-
-
-
-
-# from datetime import datetime
-
-from django.utils import timezone
-
 class MovieDetailView(DetailView):
     model = Movie
     template_name = 'movie_sys/movie_detail.html'
@@ -128,11 +119,11 @@ class MovieDetailView(DetailView):
 
         screening_time = screening_time.replace(second=0, microsecond=0)
 
-        if current_time > screening_time:
+        if current_time >= screening_time:
             # Perform actions when screening time has passed
             print("The screening time has passed.")
-            # self.export_to_csv('old_booking_data.csv')
-            # Booking.objects.all().delete()
+            self.export_to_csv('old_booking_data.csv')
+            Booking.objects.all().delete()
         else:
             # Perform actions when screening time has not passed
             print("The screening time has not passed yet.")
@@ -149,7 +140,6 @@ class MovieDetailView(DetailView):
                     'seat_row': booking.seat_row,
                     'seat_column': booking.seat_column,
                     'user': booking.user,
-                    'email': booking.user.email,
                 })
 
     def get_context_data(self, **kwargs):
@@ -159,6 +149,99 @@ class MovieDetailView(DetailView):
         context['bookings'] = Booking.objects.all()
         context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
 
+
+        self.check_screening_time()  # Call the method to check screening time
+
+        return context
+
+
+
+class MovieDetailView2(DetailView):
+    model = Movie
+    template_name = 'movie_sys/movie_detail_2.html'
+
+    def check_screening_time(self):
+        current_time = timezone.localtime()
+        screening_time = timezone.localtime(self.object.screening_datetime2)
+
+        screening_time = screening_time.replace(second=0, microsecond=0)
+
+        if current_time >= screening_time:
+            # Perform actions when screening time has passed
+            print("The screening time has passed.")
+            self.export_to_csv('old_booking_data.csv')
+            Booking2.objects.all().delete()
+        else:
+            # Perform actions when screening time has not passed
+            print("The screening time has not passed yet.")
+    def export_to_csv(self, filename):
+        bookings2 = Booking2.objects.all()
+        field_names = ['id', 'movie', 'seat_row', 'seat_column', 'user']
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=field_names)
+            writer.writeheader()
+            for booking in bookings2:
+                writer.writerow({
+                    'id': booking.id,
+                    'movie': booking.movie.title,
+                    'seat_row': booking.seat_row,
+                    'seat_column': booking.seat_column,
+                    'user': booking.user,
+                })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rows'] = range(1, self.object.theater.no_of_seat_rows + 1)
+        context['cols'] = range(1, self.object.theater.num_of_seats_column + 1)
+        context['bookings2'] = Booking2.objects.all()
+        context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
+
+
+        self.check_screening_time()  # Call the method to check screening time
+
+        return context
+
+class MovieDetailView3(DetailView):
+    model = Movie
+    template_name = 'movie_sys/movie_detail_3.html'
+
+    def check_screening_time(self):
+        current_time = timezone.localtime()
+        screening_time = timezone.localtime(self.object.screening_datetime3)
+
+        screening_time = screening_time.replace(second=0, microsecond=0)
+
+        if current_time >= screening_time:
+            # Perform actions when screening time has passed
+            print("The screening time has passed.")
+            self.export_to_csv('old_booking_data.csv')
+            Booking3.objects.all().delete()
+        else:
+            # Perform actions when screening time has not passed
+            print("The screening time has not passed yet.")
+    def export_to_csv(self, filename):
+        bookings = Booking.objects.all()
+        field_names = ['id', 'movie', 'seat_row', 'seat_column', 'user']
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=field_names)
+            writer.writeheader()
+            for booking in bookings:
+                writer.writerow({
+                    'id': booking.id,
+                    'movie': booking.movie.title,
+                    'seat_row': booking.seat_row,
+                    'seat_column': booking.seat_column,
+                    'user': booking.user,
+                })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rows'] = range(1, self.object.theater.no_of_seat_rows + 1)
+        context['cols'] = range(1, self.object.theater.num_of_seats_column + 1)
+        context['bookings3'] = Booking3.objects.all()
+        context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
+
+
         self.check_screening_time()  # Call the method to check screening time
 
         return context
@@ -166,10 +249,32 @@ class MovieDetailView(DetailView):
 
 
 
-
-
 class BookingDetailView(DetailView):
     model = Booking
+    template_name = 'booking_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        booking = self.get_object()
+        ticket_price = booking.ticket_price
+        context['ticket_price'] = ticket_price
+        print(booking)
+        return context
+
+class BookingDetailView2(DetailView):
+    model = Booking2
+    template_name = 'booking_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        booking = self.get_object()
+        ticket_price = booking.ticket_price
+        context['ticket_price'] = ticket_price
+        print(booking)
+        return context
+
+class BookingDetailView3(DetailView):
+    model = Booking3
     template_name = 'booking_detail.html'
 
     def get_context_data(self, **kwargs):
@@ -235,7 +340,7 @@ class MovieDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return False
 
 
-class OttListView(ListView):
+class OttListView( ListView):
     model = Ott
     template_name = 'movie_sys/ott_coll.html'
 
@@ -262,18 +367,6 @@ class OttCreateView(LoginRequiredMixin, CreateView):
         ott.upload_by = self.request.user
         ott.save()
         return super().form_valid(form)
-
-# @method_decorator(staff_member_required, name='dispatch')
-# class TheaterCreateView(LoginRequiredMixin, CreateView):
-#     model = Theater
-#     fields = ['theater_name', 'location', 'logo', 'user', 'no_of_seat_rows', 'num_of_seats_column', 'contact']
-#     template_name = 'movie_sys/movie_form.html'
-#
-#     def form_valid(self, form):
-#         theater = form.save(commit=False)
-#         theater.upload_by = self.request.user
-#         theater.save()
-#         return super().form_valid(form)
 
 
 
@@ -311,22 +404,18 @@ def process_bookings(request, pk):
             messages.warning(request, 'Please login to proceed with the booking.')
             return redirect('login')
 
-        current_datetime = datetime.now()
-        current_date = current_datetime.date()
+        current_datetime = datetime.now(pytz.utc)  # Make current_datetime offset-aware with UTC timezone
+        screening_datetime = movie.screening_datetime.astimezone(pytz.utc)  # Make screening_datetime offset-aware with UTC timezone
 
-        screening_date = movie.releasing_date
-        screening_time = movie.screening_datetime.time() if movie.screening_datetime else time.min
-
-        screening_datetime = datetime.combine(screening_date, screening_time)
-        current_datetime_combined = datetime.combine(current_date, current_datetime.time())
-
-        if current_datetime_combined > screening_datetime:
+        if current_datetime >= screening_datetime:
             messages.warning(request, 'The screening time has passed. Booking is not available.')
             return redirect('movie_detail', pk=pk)
 
         for seat in selected_seats:
             row = seat[0]
             col = seat[1]
+            booking = Booking(movie=movie, seat_row=row, seat_column=col, user=user)
+            booking.save()
             # Save the booking data to a CSV file
             save_booking_data(movie, row, col, user)
 
@@ -335,8 +424,18 @@ def process_bookings(request, pk):
     return redirect('movie_detail', pk=pk)
 
 
-def is_screening_time_passed(current_time, screening_time):
-    return current_time > screening_time
+def is_screening_time_passed(current_datetime, screening_datetime):
+    current_date = current_datetime.date()
+    screening_date = screening_datetime.date()
+    current_time = current_datetime.time()
+    screening_time = screening_datetime.time()
+
+    if current_date > screening_date:
+        return True
+    elif current_date == screening_date and current_time >= screening_time:
+        return True
+    else:
+        return False
 
 
 def save_booking_data(movie, row, col, user):
@@ -352,6 +451,70 @@ def save_booking_data(movie, row, col, user):
         writer.writerow(booking_data)
 
 
+
+@login_required(login_url='login')  # Add this decorator to require authentication
+def process_bookings2(request, pk):
+    if request.method == 'POST':
+        selected_seats = request.POST.getlist('seat')
+        movie = get_object_or_404(Movie, pk=pk)
+        user = request.user
+
+        if user is None:
+            # User is not logged in, redirect to the login page
+            messages.warning(request, 'Please login to proceed with the booking.')
+            return redirect('login')
+
+        current_datetime = datetime.now(pytz.utc)  # Make current_datetime offset-aware with UTC timezone
+        screening_datetime = movie.screening_datetime.astimezone(pytz.utc)  # Make screening_datetime offset-aware with UTC timezone
+
+        if current_datetime >= screening_datetime:
+            messages.warning(request, 'The screening time has passed. Booking is not available.')
+            return redirect('movie_detail', pk=pk)
+
+        for seat in selected_seats:
+            row = seat[0]
+            col = seat[1]
+            booking2 = Booking2(movie=movie, seat_row=row, seat_column=col, user=user)
+            booking2.save()
+            # Save the booking data to a CSV file
+            save_booking_data(movie, row, col, user)
+
+        messages.success(request, 'Booking successful! Enjoy the movie.')
+
+    return redirect('movie_detail_2', pk=pk)
+
+
+
+@login_required(login_url='login')  # Add this decorator to require authentication
+def process_bookings3(request, pk):
+    if request.method == 'POST':
+        selected_seats = request.POST.getlist('seat')
+        movie = get_object_or_404(Movie, pk=pk)
+        user = request.user
+
+        if user is None:
+            # User is not logged in, redirect to the login page
+            messages.warning(request, 'Please login to proceed with the booking.')
+            return redirect('login')
+
+        current_datetime = datetime.now(pytz.utc)  # Make current_datetime offset-aware with UTC timezone
+        screening_datetime = movie.screening_datetime.astimezone(pytz.utc)  # Make screening_datetime offset-aware with UTC timezone
+
+        if current_datetime >= screening_datetime:
+            messages.warning(request, 'The screening time has passed. Booking is not available.')
+            return redirect('movie_detail', pk=pk)
+
+        for seat in selected_seats:
+            row = seat[0]
+            col = seat[1]
+            booking3 = Booking3(movie=movie, seat_row=row, seat_column=col, user=user)
+            booking3.save()
+            # Save the booking data to a CSV file
+            save_booking_data(movie, row, col, user)
+
+        messages.success(request, 'Booking successful! Enjoy the movie.')
+
+    return redirect('movie_detail_3', pk=pk)
 
 
 

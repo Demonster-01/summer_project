@@ -120,6 +120,7 @@ STATIC_URL = "/static/"
 # settings.py
 
 CSRF_COOKIE_HTTPONLY = True
+TIME_ZONE = 'Asia/Kathmandu'
 
 
 
