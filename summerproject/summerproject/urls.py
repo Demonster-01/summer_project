@@ -21,7 +21,6 @@ from django.conf.urls.static import static
 from users import views as user_views
 
 from users.forms import UserUpdateView
-
 from users import views
 
 urlpatterns = [
@@ -54,7 +53,9 @@ urlpatterns = [
     path('', include('movie_sys.urls')),
 
     path('user/<int:pk>/update/', UserUpdateView.as_view(), name='user-update'),
-    path('search/',views.search,name='search')
+    path('search_user/',views.search,name='search'),
+    # path('jet/', include('jet.urls', 'jet')),
+    # path('dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
 ]
 
 if settings.DEBUG:

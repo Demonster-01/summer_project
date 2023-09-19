@@ -1,41 +1,57 @@
 {% extends "movie_sys/base.html" %}
 {% block content %}
-  <article class="media content-section">
+<article class="media content-section">
     <div class="media-body">
-      <div class="article-metadata">
-        <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
-        {% if object.author == user %}
-          <div>
-            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
-            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
-          </div>
-        {% endif %}
-      </div>
-      <h2 class="article-title">{{ object.title }}</h2>
-      <center>
-<video width="80%" height="60%" controls>
-  <source src="{{ ott.movie_video.url }}" type="video/mp4">
-</video>
-<!--      <button id="play-video">Play Video</button>-->
-</center>
+        <div class="article-metadata">
+            <button type="button" class="btn btn-danger btn-sm ml-2" id="goBackButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                     class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                          d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"></path>
+                </svg>
+                Go BACK
+            </button>
+
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                {% if message.tags %}
+                <h4 class="msg {{ message.tags }} fs-3">
+                    {% endif %}
+                    {{ message }}
+                </h4>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <script>
+    // Wait for 10 seconds and then remove the messages
+    setTimeout(function() {
+        var messages = document.querySelectorAll('.messages');
+        messages.forEach(function(message) {
+            message.remove();
+        });
+    }, 6000); // 10000 milliseconds = 10 seconds
+
+            </script>
+            <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+            {% if object.author == user %}
+            <div>
+                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
+                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
+            </div>
+            {% endif %}
+        </div>
+        <h2 class="article-title">{{ object.title }}</h2>
+        <center>
+            <video width="800" height="600" controls poster="{{ ott.poster.url }}">
+                <source src="{{ ott.movie_video.url }}" type="video/mp4">
+            </video>
+            <!--      <button id="play-video">Play Video</button>-->
+        </center>
 
     </div>
-  </article>
+</article>
 {% endblock content %}
 
 
-<!--
-{% block script %}
 
-<script>
-  const playButton = document.getElementById('play-video');
-  const videoPlayer = document.getElementById('video-player');
-
-  playButton.addEventListener('click', () => {
-    videoPlayer.autoplay = true;
-    videoPlayer.load();
-  });
-</script>
-
-
-{% endblock script %}-->

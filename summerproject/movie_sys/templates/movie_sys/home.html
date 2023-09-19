@@ -4,18 +4,26 @@
 
 {% block title %} Home {% endblock %}
 {% block content %}
-    <center><h2>Movie ticket booking</h2></center>
+<center><h2>Movie ticket booking</h2></center>
+
+<div class="col-md-12 d-flex justify-content-end">
+    <form method="get" class="form-inline my-2 my-lg-0" action="{% url 'search_theater' %}">
+        <input type="search" class="form-control search_input mr-sm-2" name="query" placeholder="location..."
+               value="{{ request.GET.query }}">
+    </form>
+</div>
 <div class="gallery">
     <div class="row">
         {% for theater in theaters %}
         <div class="item col-md-3">
             <a href="{% url 'movie_sys-movie_coll' theater.id %}">
-            <img src="{{ theater.logo.url }}" alt="{{ theater.name }}" width="300px" height="300px"></a>
+                <img src="{{ theater.logo.url }}" alt="{{ theater.name }}" width="300px" height="300px"></a>
             <div class="details" style="width: 100%;">
                 <div class="text-center">
-            <h6 style="font-size: 20px">{{ theater.theater_name }}</h6>
-                <a href="{% url 'movie_sys-movie_coll' theater.id %}" class="btn btn-primary">Visit</a>
-            </div>
+                    <h6 style="font-size: 20px">{{ theater.theater_name }}</h6>
+                    <span class="bi bi-geo-alt">{{ theater.location }}</span>
+                    <a href="{% url 'movie_sys-movie_coll' theater.id %}" class="btn btn-primary">Visit</a>
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -24,43 +32,41 @@
 <hr>
 <hr>
 <div class="container">
-  <h2 class="text-center my-5">Upcomming Movies</h2>
-  <div class="gallery">
-    {% for upcomming in upcommings %}
-      <div class="upcomming_item">
-        <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="300px" height="400px" >
-        <div class="details">
-          <h2 class="upcomming_head">{{ upcomming.title }}</h2>
-          <p><strong>Genre:</strong> {{ upcomming.genre }}</p>
-          <p><strong>Cast:</strong> {{ upcomming.cast }}</p>
-          <p><strong>Directed By:</strong> {{ upcomming.directed_by }}</p>
+    <h2 class="text-center my-5">Upcomming Movies</h2>
+    <div class="gallery">
+        {% for upcomming in upcommings %}
+        <div class="upcomming_item">
+            <img src="{{ upcomming.poster.url }}" alt="{{ upcomming.title }}" width="300px" height="400px">
+            <div class="details">
+                <h2 class="upcomming_head">{{ upcomming.title }}</h2>
+                <p><strong>Genre:</strong> {{ upcomming.genre }}</p>
+                <p><strong>Cast:</strong> {{ upcomming.cast }}</p>
+                <p><strong>Directed By:</strong> {{ upcomming.directed_by }}</p>
+            </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+        {% endfor %}
+    </div>
 </div>
 <hr>
 <hr>
 
-  <h2 class="text-center my-5">Browse Movies</h2>
-<div class="gallery"    >
+<h2 class="text-center my-5">Browse Movies</h2>
+<div class="gallery">
     <div class="row">
         {% for ott in ott_list %}
         <div class="item col-md-3">
-          <a href="{% url 'ott_detail' pk=ott.pk %}">
-               <img src="{{ ott.poster.url }}" alt="{{ theater.theater_name }}" width="300px" height="300px"></a>
-              <div>
-
-            <a href="#" class="btn btn-primary">Add watch later</a>
-       </div>
+            <a href="{% url 'ott_detail' pk=ott.pk %}">
+                <img src="{{ ott.poster.url }}" alt="{{ theater.theater_name }}" width="300px" height="300px"></a>
+            <div>
+                   <a href="{% url 'add_watch_later' pk=ott.pk %}" class="btn btn-primary">Add watch later</a>
+            </div>
         </div>
 
         {% endfor %}
     </div>
 </div>
- <a href="{% url 'movie_sys-ott_collection' %}" class="btn btn-primary">Explore More</a>
+<a href="{% url 'movie_sys-ott_collection' %}" class="btn btn-primary">Explore More</a>
 <hr>
-
 
 
 {% endblock %}

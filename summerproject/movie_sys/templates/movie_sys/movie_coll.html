@@ -28,19 +28,21 @@
     <div class="col-md-4">
         <div class="poster">
 <hr><br>
-            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" width="80%" height="250px">
+            <a href="{% url 'Trailerpage' pk=movie.pk %}" ><img src="{{ movie.poster.url }}" alt="{{ movie.title }}" width="80%" height="250px"></a>
         </div>
     </div>
     <div class="col-md-5">
         <div class="detailss">
             <h2>{{ movie.title }}</h2>
             <p>{{ movie.description }}</p>
+            <a href="{% url 'Trailerpage' pk=movie.pk %}"><span><i class="bi bi-camera-reels"></i>Trailer</span></a>
+
         </div>
     </div>
     <div class="col-md-2">
         <div class="info">
             <ul class="movie-meta">
-                <li><strong>Director:</strong> {{ movie.director }}</li>
+                <li><strong>Director:</strong> {{ movie.directed_by }}</li>
                 <li><strong>Genre:</strong> {{ movie.genre }}</li>
                 <li><strong>Release Date:</strong> {{ movie.release_date }}</li>
             </ul>

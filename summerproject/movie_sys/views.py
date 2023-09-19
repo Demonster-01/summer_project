@@ -1,6 +1,7 @@
 import csv
-import json
-from datetime import timezone, datetime
+from datetime import timezone, datetime, timedelta
+from django.db import transaction, IntegrityError
+
 import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 from django.http import JsonResponse
@@ -9,12 +10,18 @@ from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView)
 from pyexpat.errors import messages
 from django.utils import timezone
-from .models import Movie, Theater, Upcomming, Booking, Ott, Booking2, Booking3
+from .models import Movie, Theater, Upcomming, Booking, Ott, Booking2, Booking3, WatchLater
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-
+from django.db import transaction
+from django.db.utils import IntegrityError
+from django.contrib import messages
 from users.models import Profile, User
+
+
+# def movie_deta(request):
+#     return render(request,'movie_sys/movie_deta.html')
 
 
 class MovieListView(ListView):
@@ -56,58 +63,6 @@ class MoviecollListView(ListView):
 
         return context
 
-
-# def movie_coll(request, theater_name):
-#     theater = get_object_or_404(Theater, theater_name=theater_name)
-#     movies = Movie.objects.filter(theater=theater_name)
-#     theaters = Theater.objects.all()
-#     upcommings = Upcomming.objects.filter(upload_by=theater_name)
-#
-#     context = {
-#         'movies': movies,
-#         'theaters': theaters,
-#         'upcommings': upcommings,
-#         'theater': theater,
-#     }
-#
-#     return render(request, 'movie_sys/movie_coll.html', context)
-
-
-#
-# from django.http import Http404
-# def movie_coll(request, theater_name):
-#     try:
-#         theater = Theater.objects.get(theater_name=theater_name)
-#
-#         if request.user == theater.user:
-#             movies = Movie.objects.filter(theater=theater)
-#             upcommings = Upcomming.objects.filter(upload_by=theater)
-#
-#             context = {
-#                 'theater': theater,
-#                 'movies': movies,
-#                 'upcommings': upcommings,
-#             }
-#
-#             return render(request, 'movie_sys/movie_coll.html', context)
-#         else:
-#             raise Http404("This theater does not belong to the current user.")
-#     except Theater.DoesNotExist:
-#         raise Http404("Theater matching query does not exist.")
-
-
-
-
-
-# class MovieDetailView(DetailView):
-#     model = Movie
-#     template_name = 'movie_sys/movie_detail.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['rows'] = range(1, self.object.theater.no_of_seat_rows + 1)
-#         context['cols'] = range(1, self.object.theater.num_of_seats_column + 1)
-#         return context
 
 class MovieDetailView(DetailView):
     model = Movie
@@ -246,7 +201,10 @@ class MovieDetailView3(DetailView):
 
         return context
 
-
+class TrailerView(DetailView):
+    model = Movie
+    template_name = 'movie_sys/trailer_play.html'  # replace with your actual template name
+    context_object_name = 'trailer'
 
 
 class BookingDetailView(DetailView):
@@ -286,23 +244,9 @@ class BookingDetailView3(DetailView):
         return context
 
 
-
-
-@csrf_exempt
-def occupiedSeats(request):
-    data = json.loads(request.body)
-    movie_title = data["movie_title"]
-    movie = Movie.objects.get(title=movie_title)
-    occupied_seats = movie.booked_seats.values_list('seat_no', flat=True)
-
-    return JsonResponse({
-        "occupied_seats": list(occupied_seats),
-        "movie_title": movie_title
-    })
-
 class MovieCreateView(LoginRequiredMixin, CreateView):
     model = Movie
-    fields = ['title', 'poster','releasing_date','genre','cast','directed_by','description','promo_code','offer','ticket_price']
+    fields = ['title','trailer_video', 'poster','screening_datetime','screening_datetime2','screening_datetime3','genre','cast','directed_by','description','promo_code','offer','ticket_price']
     template_name = 'movie_sys/movie_form.html'
     success_url = '/'
     def form_valid(self, form):
@@ -313,7 +257,7 @@ class MovieCreateView(LoginRequiredMixin, CreateView):
 
 class MovieUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Movie
-    fields = ['title', 'poster','releasing_date','genre','cast','directed_by','description','promo_code','offer','ticket_price']
+    fields = ['title','trailer_video', 'poster','releasing_date','genre','cast','directed_by','description','promo_code','offer','ticket_price']
     template_name = 'movie_sys/movie_form.html'
 
     def form_valid(self, form):
@@ -350,7 +294,7 @@ class OttListView( ListView):
         return context
 
 
-class OttDetailView(DetailView):
+class OttDetailView(LoginRequiredMixin,DetailView):
     model = Ott
     template_name = 'movie_sys/ott_detail.html'  # replace with your actual template name
     context_object_name = 'ott'
@@ -389,39 +333,55 @@ class TheaterCreateView(LoginRequiredMixin, CreateView):
 
 
 
-from django.contrib import messages
 
+@csrf_exempt
+def check_booking_lock(request):
+    movie_id = request.POST.get('movie_id')
+    lock_key = f'booking_lock_{movie_id}'
+    is_locked = request.session.get(lock_key, False)
 
-@login_required(login_url='login')  # Add this decorator to require authentication
-def process_bookings(request, pk):
-    if request.method == 'POST':
-        selected_seats = request.POST.getlist('seat')
-        movie = get_object_or_404(Movie, pk=pk)
-        user = request.user
+    return JsonResponse({'is_locked': is_locked})
 
-        if user is None:
-            # User is not logged in, redirect to the login page
-            messages.warning(request, 'Please login to proceed with the booking.')
-            return redirect('login')
-
-        current_datetime = datetime.now(pytz.utc)  # Make current_datetime offset-aware with UTC timezone
-        screening_datetime = movie.screening_datetime.astimezone(pytz.utc)  # Make screening_datetime offset-aware with UTC timezone
-
-        if current_datetime >= screening_datetime:
-            messages.warning(request, 'The screening time has passed. Booking is not available.')
-            return redirect('movie_detail', pk=pk)
-
-        for seat in selected_seats:
-            row = seat[0]
-            col = seat[1]
-            booking = Booking(movie=movie, seat_row=row, seat_column=col, user=user)
-            booking.save()
-            # Save the booking data to a CSV file
-            save_booking_data(movie, row, col, user)
-
-        messages.success(request, 'Booking successful! Enjoy the movie.')
-
-    return redirect('movie_detail', pk=pk)
+# @login_required(login_url='login')
+# def process_bookings(request, pk):
+#     if request.method == 'POST':
+#         selected_seats = request.POST.getlist('seat')
+#         movie = get_object_or_404(Movie, pk=pk)
+#         user = request.user
+#         selected_screening =movie.screening_datetime
+#
+#         if user is None:
+#             messages.warning(request, 'Please login to proceed with the booking.')
+#             return redirect('login')
+#         # Define the maximum allowed bookings for the user
+#         max_allowed_bookings = 10
+#
+#         # Count the user's existing bookings
+#         existing_bookings = Booking.objects.filter(user=user).count()
+#
+#         current_datetime = datetime.now(pytz.utc)
+#         screening_datetime = movie.screening_datetime.astimezone(pytz.utc)
+#         time_difference = screening_datetime - current_datetime
+#         if time_difference <= timedelta(minutes=40):
+#             messages.warning(request, 'The screening time is too close. Booking is not available.')
+#         elif existing_bookings >= max_allowed_bookings:
+#             messages.warning(request, 'You have already booked the maximum allowed seats.i.e 10seat per user')
+#         else:
+#             with transaction.atomic():
+#                 for seat in selected_seats:
+#                     row = seat[0]
+#                     col = seat[1]
+#
+#                     try:
+#                         # Attempt to create a booking while acquiring a row-level lock
+#                         booking = Booking(movie=movie, seat_row=row, seat_column=col, user=user,selected_screening = selected_screening)
+#                         booking.save()
+#                         save_booking_data(movie, row, col, user)
+#                         messages.success(request, f'Seat {row}{col}Booking successful! Enjoy the movie.')
+#                     except IntegrityError:
+#                         # The seat is already booked, handle gracefully
+#                         messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
+#     return redirect('movie_detail', pk=pk)
 
 
 def is_screening_time_passed(current_datetime, screening_datetime):
@@ -452,96 +412,374 @@ def save_booking_data(movie, row, col, user):
 
 
 
-@login_required(login_url='login')  # Add this decorator to require authentication
+
+
+@login_required(login_url='login')
+def process_bookings(request, pk):
+    if request.method == 'POST':
+        selected_seats = request.POST.getlist('seat')
+        movie = get_object_or_404(Movie, pk=pk)
+        user = request.user
+        selected_screening = movie.screening_datetime  # Adjust as needed
+
+        if user is None:
+            messages.warning(request, 'Please log in to proceed with the booking.')
+            return redirect('login')
+
+        max_allowed_bookings_total = 10
+        existing_bookings_total = Booking.objects.filter(user=user).count()
+
+        if existing_bookings_total >= max_allowed_bookings_total:
+            messages.warning(request, 'You have already booked the maximum allowed seats (10 in total).')
+        else:
+            current_datetime = timezone.now()
+            screening_datetime = movie.screening_datetime  # Adjust as needed
+
+            time_difference = screening_datetime - current_datetime
+
+            if time_difference <= timedelta(minutes=40):
+                messages.warning(request, 'The screening time is too close. Booking is not available.')
+            else:
+                with transaction.atomic():
+                    bookings_for_screening = Booking.objects.filter(movie=movie, user=user).count()
+
+                    if bookings_for_screening >= max_allowed_bookings_total:
+                        messages.warning(request, 'You have already booked the maximum allowed seats for this screening.')
+                    else:
+                        # Calculate the number of seats left to book for this screening
+                        seats_left_for_screening = max_allowed_bookings_total - bookings_for_screening
+
+                        # Check if the user is trying to book more seats than are available for this screening
+                        if len(selected_seats) > seats_left_for_screening:
+                            messages.warning(request, f'You can only book {seats_left_for_screening} seats for this screening.')
+                        else:
+                            for seat in selected_seats:
+                                row = seat[0]
+                                col = seat[1]
+
+                                try:
+                                    # Attempt to create a booking while acquiring a row-level lock
+                                    booking = Booking(
+                                        movie=movie,
+                                        seat_row=row,
+                                        seat_column=col,
+                                        user=user,
+                                        selected_screening=selected_screening,
+                                    )
+                                    booking.save()
+                                    # Save additional booking data if needed
+                                    messages.success(request, f'Seat {row}{col} booking successful! Enjoy the movie.')
+                                except IntegrityError:
+                                    # The seat is already booked, handle gracefully
+                                    messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
+
+    return redirect('movie_detail', pk=pk)
+
+
+
+
+@login_required(login_url='login')
 def process_bookings2(request, pk):
     if request.method == 'POST':
         selected_seats = request.POST.getlist('seat')
         movie = get_object_or_404(Movie, pk=pk)
         user = request.user
+        selected_screening = movie.screening_datetime2  # Adjust as needed
 
         if user is None:
-            # User is not logged in, redirect to the login page
-            messages.warning(request, 'Please login to proceed with the booking.')
+            messages.warning(request, 'Please log in to proceed with the booking.')
             return redirect('login')
 
-        current_datetime = datetime.now(pytz.utc)  # Make current_datetime offset-aware with UTC timezone
-        screening_datetime = movie.screening_datetime.astimezone(pytz.utc)  # Make screening_datetime offset-aware with UTC timezone
+        max_allowed_bookings_total = 10
+        existing_bookings_total = Booking2.objects.filter(user=user).count()
 
-        if current_datetime >= screening_datetime:
-            messages.warning(request, 'The screening time has passed. Booking is not available.')
-            return redirect('movie_detail', pk=pk)
+        if existing_bookings_total >= max_allowed_bookings_total:
+            messages.warning(request, 'You have already booked the maximum allowed seats (10 in total).')
+        else:
+            current_datetime = timezone.now()
+            screening_datetime = movie.screening_datetime2  # Adjust as needed
 
-        for seat in selected_seats:
-            row = seat[0]
-            col = seat[1]
-            booking2 = Booking2(movie=movie, seat_row=row, seat_column=col, user=user)
-            booking2.save()
-            # Save the booking data to a CSV file
-            save_booking_data(movie, row, col, user)
+            time_difference = screening_datetime - current_datetime
 
-        messages.success(request, 'Booking successful! Enjoy the movie.')
+            if time_difference <= timedelta(minutes=40):
+                messages.warning(request, 'The screening time is too close. Booking is not available.')
+            else:
+                with transaction.atomic():
+                    bookings_for_screening = Booking2.objects.filter(movie=movie, user=user).count()
+
+                    if bookings_for_screening >= max_allowed_bookings_total:
+                        messages.warning(request, 'You have already booked the maximum allowed seats for this screening.')
+                    else:
+                        # Calculate the number of seats left to book for this screening
+                        seats_left_for_screening = max_allowed_bookings_total - bookings_for_screening
+
+                        # Check if the user is trying to book more seats than are available for this screening
+                        if len(selected_seats) > seats_left_for_screening:
+                            messages.warning(request, f'You can only book {seats_left_for_screening} seats for this screening.')
+                        else:
+                            for seat in selected_seats:
+                                row = seat[0]
+                                col = seat[1]
+
+                                try:
+                                    # Attempt to create a booking while acquiring a row-level lock
+                                    booking2 = Booking2(
+                                        movie=movie,
+                                        seat_row=row,
+                                        seat_column=col,
+                                        user=user,
+                                        selected_screening=selected_screening,
+                                    )
+                                    booking2.save()
+                                    # Save additional booking data if needed
+                                    messages.success(request, f'Seat {row}{col} booking successful! Enjoy the movie.')
+                                except IntegrityError:
+                                    # The seat is already booked, handle gracefully
+                                    messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
 
     return redirect('movie_detail_2', pk=pk)
 
 
 
-@login_required(login_url='login')  # Add this decorator to require authentication
+@login_required(login_url='login')
 def process_bookings3(request, pk):
     if request.method == 'POST':
         selected_seats = request.POST.getlist('seat')
         movie = get_object_or_404(Movie, pk=pk)
         user = request.user
+        selected_screening = movie.screening_datetime3  # Adjust as needed
 
         if user is None:
-            # User is not logged in, redirect to the login page
-            messages.warning(request, 'Please login to proceed with the booking.')
+            messages.warning(request, 'Please log in to proceed with the booking.')
             return redirect('login')
 
-        current_datetime = datetime.now(pytz.utc)  # Make current_datetime offset-aware with UTC timezone
-        screening_datetime = movie.screening_datetime.astimezone(pytz.utc)  # Make screening_datetime offset-aware with UTC timezone
+        max_allowed_bookings_per_screening = 10
+        existing_bookings_for_screening = Booking3.objects.filter(movie=movie, user=user).count()
 
-        if current_datetime >= screening_datetime:
-            messages.warning(request, 'The screening time has passed. Booking is not available.')
-            return redirect('movie_detail', pk=pk)
+        if existing_bookings_for_screening >= max_allowed_bookings_per_screening:
+            messages.warning(request, 'You have already booked the maximum allowed seats for this screening.')
+        else:
+            current_datetime = timezone.now()
+            screening_datetime = movie.screening_datetime3  # Adjust as needed
 
-        for seat in selected_seats:
-            row = seat[0]
-            col = seat[1]
-            booking3 = Booking3(movie=movie, seat_row=row, seat_column=col, user=user)
-            booking3.save()
-            # Save the booking data to a CSV file
-            save_booking_data(movie, row, col, user)
+            time_difference = screening_datetime - current_datetime
 
-        messages.success(request, 'Booking successful! Enjoy the movie.')
+            if time_difference <= timedelta(minutes=40):
+                messages.warning(request, 'The screening time is too close. Booking is not available.')
+            else:
+                with transaction.atomic():
+                    for seat in selected_seats:
+                        row = seat[0]
+                        col = seat[1]
+
+                        try:
+                            # Attempt to create a booking while acquiring a row-level lock
+                            booking3 = Booking3(
+                                movie=movie,
+                                seat_row=row,
+                                seat_column=col,
+                                user=user,
+                                selected_screening=selected_screening,
+                            )
+                            booking3.save()
+                            # Save additional booking data if needed
+                            messages.success(request, f'Seat {row}{col} booking successful! Enjoy the movie.')
+                        except IntegrityError:
+                            # The seat is already booked, handle gracefully
+                            messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
 
     return redirect('movie_detail_3', pk=pk)
 
 
 
+# @login_required(login_url='login')
+# def process_bookings3(request, pk):
+#     if request.method == 'POST':
+#         selected_seats = request.POST.getlist('seat')
+#         movie = get_object_or_404(Movie, pk=pk)
+#         user = request.user
+#         selected_screening =movie.screening_datetime3
+#         print(selected_screening,"a000000000000000000000000000000")
+#
+#         if user is None:
+#             messages.warning(request, 'Please login to proceed with the booking.')
+#             return redirect('login')
+#
+#         current_datetime = datetime.now(pytz.utc)
+#         screening_datetime = movie.screening_datetime.astimezone(pytz.utc)
+#         time_difference = screening_datetime - current_datetime
+#         if time_difference <= timedelta(minutes=40):
+#             messages.warning(request, 'The screening time is too close. Booking is not available.')
+#             return redirect('movie_detail', pk=pk)
+#         #
+#         # if current_datetime >= screening_datetime:
+#         #     messages.warning(request, 'The screening time has passed. Booking is not available.')
+#         #     return redirect('movie_detail', pk=pk)
+#
+#         with transaction.atomic():
+#             for seat in selected_seats:
+#                 row = seat[0]
+#                 col = seat[1]
+#
+#                 try:
+#                     # Attempt to create a booking while acquiring a row-level lock
+#                     booking3 = Booking3(movie=movie, seat_row=row, seat_column=col, user=user,selected_screening = selected_screening)
+#                     booking3.save()
+#                     save_booking_data(movie, row, col, user)
+#                     messages.success(request, f'Seat {row}{col}Booking successful! Enjoy the movie.')
+#                 except IntegrityError:
+#                     # The seat is already booked, handle gracefully
+#                     messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
+#
+#     return redirect('movie_detail_3', pk=pk)
 
-#
-# from datetime import datetime
-# from .models import Screening, Dataset
-# from .utils import is_screening_time_passed
-#
-# def reset_or_create_dataset(request):
-#     screenings = Screening.objects.all()
-#
-#     for screening in screenings:
-#         if is_screening_time_passed(screening.screening_time):
-#             # Reset or create new dataset for this screening
-#             # Perform the necessary actions based on your requirements
-#             # Example:
-#             screening.dataset_set.all().delete()  # Delete existing related datasets
-#
-#             # Create new dataset instances
-#             new_dataset1 = Dataset(screening=screening, ...)
-#             new_dataset1.save()
-#             new_dataset2 = Dataset(screening=screening, ...)
-#             new_dataset2.save()
-#
-#     # Perform any other necessary actions or return a response
-#     return HttpResponse("Dataset reset/creation completed.")
-#
 
+def search_theater(request):
+    if 'query' in request.GET:
+        query = request.GET['query']
+        theaters = Theater.objects.filter(location__icontains=query)
+        params = {'theaters': theaters}
+        return render(request, 'movie_sys/search.html', params)
+    return render(request, 'movie_sys/search.html')
+
+
+
+
+@login_required(login_url='login')
+def my_booking(request):
+    user = request.user
+
+    if user.is_authenticated:
+        profile = get_object_or_404(Profile, user=user)
+        watch_later_ott = profile.watch_later.all()
+
+        # Fetch bookings from all three models
+        bookings1 = Booking.objects.filter(user=user)
+        bookings2 = Booking2.objects.filter(user=user)
+        bookings3 = Booking3.objects.filter(user=user)
+
+        # Combine the booking data
+        all_bookings = list(bookings1) + list(bookings2) + list(bookings3)
+
+        watch_later_movies = WatchLater.objects.filter(user=user).select_related('movie_title')
+        context = {
+            'all_bookings': all_bookings,
+            'watch_later_movies': watch_later_movies,
+            'watch_later_ott': watch_later_ott
+        }
+        return render(request, 'movie_sys/mybookings.html', context)
+    else:
+        # Handle the case where the user is not authenticated
+        return redirect('login')  # You can replace 'login' with the appropriate login URL
+
+
+login_required(login_url='login')
+def add_to_watch_later(request, pk):
+    user = request.user
+
+    if user.is_authenticated:
+        ott = get_object_or_404(Ott, pk=pk)
+        profile = get_object_or_404(Profile, user=request.user)
+
+        if ott in profile.watch_later.all():
+            messages.warning(request, f'{ott.title} is already in your watch later list.')
+        else:
+            profile.watch_later.add(ott)
+            messages.success(request, f'{ott.title} has been added to your watch later list.')
+
+        return redirect('ott_detail', pk=pk)
+    else:
+        # Handle the case where the user is not authenticated
+        return redirect('login')  # You can replace 'login' with the appropriate login URL
+
+
+
+
+
+@login_required(login_url='login')
+def cancel_booking(request, booking_id):
+    try:
+        user = request.user
+
+        all_bookings = list(Booking.objects.filter(user=user, is_canceled=False)) + \
+                       list(Booking2.objects.filter(user=user, is_canceled=False)) + \
+                       list(Booking3.objects.filter(user=user, is_canceled=False))
+
+        # Fetch the booking to cancel
+        # booking_to_cancel = Booking.objects.get(id=booking_id, user=user, is_canceled=False)
+        booking_to_cancel = next((booking for booking in all_bookings if booking.id == booking_id), None)
+
+        # Calculate the time difference
+        current_datetime = datetime.now(pytz.utc)
+        screening_datetime = booking_to_cancel.selected_screening.astimezone(pytz.utc)
+        time_difference = screening_datetime - current_datetime
+
+
+        if time_difference <= timedelta(minutes=45):
+            messages.warning(request, 'Booking cancellation is not available within 45 minutes of screening.')
+        elif timedelta(minutes=45) < time_difference <= timedelta(hours=1, minutes=30):
+            # 50% refund
+            booking_to_cancel.is_canceled = True
+            booking_to_cancel.delete()
+            messages.success(request, 'Booking canceled. 50% refund applied.')
+        elif timedelta(hours=1, minutes=30) < time_difference <= timedelta(hours=2):
+            # 75% refund
+            booking_to_cancel.is_canceled = True
+            booking_to_cancel.delete()
+            messages.success(request, 'Booking canceled. 75% refund applied.')
+        else:
+            # 90% refund
+            booking_to_cancel.is_canceled = True
+            booking_to_cancel.delete()
+            messages.success(request, 'Booking canceled. 90% refund applied.')
+
+        return redirect('my_booking')
+
+    except Booking.DoesNotExist:
+        messages.warning(request, 'Booking not found or already canceled.')
+        return redirect('my_booking')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {e}")
+        return redirect('my_booking')
+
+
+# @login_required(login_url='login')
+# def cancel_booking(request, booking_id):
+#     user = request.user
+#     try:
+#         all_bookings = list(Booking.objects.filter(user=user, is_canceled=False)) + \
+#                        list(Booking2.objects.filter(user=user, is_canceled=False)) + \
+#                        list(Booking3.objects.filter(user=user, is_canceled=False))
+#
+#         booking_to_cancel = next((booking for booking in all_bookings if booking.id == booking_id), None)
+#
+#
+#         if booking_to_cancel is None:
+#             return redirect('my_booking')
+#         booking_to_cancel.is_canceled = True
+#         # booking_to_cancel.save()
+#         booking_to_cancel.delete()
+#
+#         return redirect('my_booking')
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+
+
+@login_required(login_url='login')
+def remove_from_watch_later(request, pk):
+    user = request.user
+
+    if user.is_authenticated:
+        ott = get_object_or_404(Ott, pk=pk)
+        profile = get_object_or_404(Profile, user=user)
+
+        if ott in profile.watch_later.all():
+            profile.watch_later.remove(ott)
+            messages.success(request, f'{ott.title} has been removed from your watch later list.')
+        else:
+            messages.warning(request, f'{ott.title} was not found in your watch later list.')
+
+        return redirect('my_booking')
+    else:
+        return redirect('login')
 

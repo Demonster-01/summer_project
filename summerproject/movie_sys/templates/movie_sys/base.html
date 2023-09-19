@@ -9,11 +9,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" type="text/css" href="{% static 'movie_sys/main.css' %}">
 
 
@@ -26,32 +27,51 @@
         <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
             <div class="container">
                 <a class="navbar-brand mr-4" href="{% url 'movie_sys-home' %}">
-          <img src="{% static 'photos/iconn.png' %}" alt="icon" class="nav-icon"  id="nav-image"> QFX cinema</a>
+                    <img src="{% static 'photos/cinemalogo.png' %}" alt="icon" class="nav-icon" id="nav-image"> QFX
+                    cinema</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
                         aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
-                        <a class="nav-item nav-link" href="{% url 'movie_sys-home' %}"><u>Home</u></a>
-                        <a class="nav-item nav-link" href="{% url 'movie_sys-about' %}"><u>About</u></a>
+                        <a class="nav-item nav-link" href="{% url 'movie_sys-home' %}">
+<!--                        <i class="bi bi-house"></i>--> <u>Home</u></a>
+
+                        <a class="nav-item nav-link" href="{% url 'movie_sys-about' %}"><u >About</u></a>
+                        <a class="nav-item nav-link" href="{% url 'my_booking' %}"><u>Bookings</u></i></a>
+                        <div class="dropdown show">
+                            <a class="nav-item nav-link" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                More<i class="bi bi-three-dots-vertical"></i>
+                            </a>
+
+                            <div class="dropdown-menu bg-secondary border rounded" aria-labelledby="dropdownMenuLink">
+                                {% if user.profile.role == 'admin' or user.profile.role == 'manager' %}
+                                <a class="dropdown-item" href="{% url 'theater-create' %}">create theater</a>
+                                {% endif %}
+                                <a class="dropdown-item" href="#">Customer service</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </div>
                     </div>
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav">
                         {% if user.is_authenticated %}
-                        {% if user.profile.role == 'admin' or user.profile.role == 'manager' %}
-                        <a class="nav-item nav-link" href="{% url 'theater-create' %}"><u>create theater</u></a>
-                        {% endif %}
+
                         {% if user.profile.role == 'admin' %}
                         <!--                    <a class="nav-item nav-link" href="{% url 'user-update' user.pk %}">edit user</a>-->
-                        <form method="get" action="/search" class="form-inline my-2 my-lg-0">
+                        <form method="get" action="/search_user" class="form-inline my-2 my-lg-0">
                             <input class="form-control search_input mr-sm-2" type="search" name="query"
                                    placeholder="user@gmail.com" id="query">
                         </form>
                         {% endif %}
 
-                        <a class="nav-item nav-link" href="{% url 'profile' %}"><u>Profile</u></a>
-                        <a class="nav-item nav-link" href="{% url 'logout' %}"><u>Logout</u></a>
+                        <span class="nav-item"> HI,{{ user.username }}</span>
+                        <a class="nav-item nav-link " href="{% url 'profile' %}">Profile</a>
+                        <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+
+
 
 
                         {% else %}
@@ -117,6 +137,18 @@
     </div>
 
 </footer>
+
+<script>
+<!--for go back btn-->
+    document.addEventListener('DOMContentLoaded', function () {
+        const goBackButton = document.getElementById('goBackButton');
+
+        goBackButton.addEventListener('click', function () {
+            history.back(); // Go back to the previous page
+        });
+    });
+</script>
+
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="{% static 'movie_sys/backend.js' %}"></script>

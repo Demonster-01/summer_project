@@ -1,5 +1,5 @@
 body {
-  background: #50285A;
+  background: #343541;
   color: #d9d9d9;
   margin-top: 70px;
   margin-left: 30px;
@@ -47,11 +47,12 @@ img,div,not(#nav-image){
 }*/
 
 .bg-steel {
-  background-color: #854F69;
+  background-color:#43627a ;
 }
 
 .site-header .navbar-nav .nav-link {
-  color: #cbd5db;
+  color: white;
+  padding-left: 1em;
 }
 
 .site-header .navbar-nav .nav-link:hover {
@@ -65,9 +66,10 @@ img,div,not(#nav-image){
 .nav-icon {
   margin-right: 20px;
   cursor: auto;
-  width: 32px;
-  height:32px;
+  width: 2rem;
+  height:2rem;
   filter: drop-shadow(3px 3px 4px white);
+  margin:3px;
 }
 .nav-icon:hover{
     transform:scale(1.8);
@@ -128,6 +130,23 @@ width: 300px; /* adjust as needed */
   width:300px;
   border-radius: 20px;
 }
+.detailss p {
+    height: 20vh;
+    overflow: hidden; /* Hide the default scrollbar */
+    overflow-y: scroll; /* Enable vertical scrolling */
+    /* Optional: Add padding or margin to prevent content from being cut off */
+    padding: 10px 10px 10px 15px; /* Adjust as needed */
+}
+
+.detailss p::-webkit-scrollbar {
+    width: 0.5em; /* Set a width for the scrollbar track */
+    display: none; /* Hide the scrollbar */
+}
+
+.detailss p::-webkit-scrollbar-thumb {
+    background-color: darkgray; /* Set color for the thumb */
+    border-radius: 0.25em; /* Add rounded corners to the thumb */
+}
 
 .upcomming_head{
   margin: 0;
@@ -138,10 +157,8 @@ width: 300px; /* adjust as needed */
 
 .btn {
   display: block;
-  margin: 10px auto;
+  margin: 0px auto;
   padding: 8px 20px;
-/*  background-color: #007bff;*/
-/*  color: #fff;*/
   border: none;
   border-radius: 20px;
   text-decoration: none;
@@ -162,71 +179,12 @@ input[type="checkbox"]:disabled {
 }
 
 
-
-/*movie_coll*/
-/* Add spacing between table cells */
-table.coll_table {
-  border-collapse: separate;
-  border-spacing: 10px;
-  margin-bottom: 20px;      
-}
-
-/* Set width for table columns */
-table.coll_table td {
-  width: 50%;
-  padding-left: 40px;
-}
-
-
-
-
-
-  /* Set table cell containing movie info to relative positioning */
-  .movie-info {
-    position: relative;
-  }
-
-  /* Position Buy button to bottom-right corner of table cell */
-  .buy-button-container {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin: 10px;
-  }
-
-
-
 /*Upcomming */
 .cardd{
   background-color: #28a745;
 }
 
 
-
-/*seat and pay*/
-/*.seat_pay{
-  width: 100%;
-  border: solid 2px;
-  border-color: red ;
-}
-.seat{
-  width: 70%;
-  float: right;
-  padding: 5% 0;
-
-  border: solid 2px;
-  border-color: gold ;
-
-}
-.pay{
-  width: 30%;
-  height: 100%;
-  padding: auto;
-
-  border: solid 2px;
-  border-color: green ;
-}
-*/
 .seat_pay {
   margin-left: 10%;
   display: flex;
@@ -297,12 +255,15 @@ input[type="checkbox"]:checked {
 }
 .times{
    border:1px solid #854F69;
+   border-radius: 20px;
    padding: 10px;
    margin-right:10px ;
 }
-.times:hover{
-  box-shadow: 0px 5px 3px white;
+.times:hover,
+.times.active {
+  box-shadow: 0px 5px 3px #FF00CC, inset 0px 5px 3px white;
 }
+
 .seat_symbol{
   border: 1px solid #854F69;
 }
@@ -352,3 +313,23 @@ input[type="checkbox"]:checked {
             text-transform: uppercase;
             letter-spacing: 1.2px;
         }
+
+.booking-poster {
+    width: 5rem;
+    height: 5rem;
+}
+.message {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.success {
+    background-color: #5cb85c; /* Green background for success messages */
+    color: #fff; /* White text color for success messages */
+}
+
+.warning {
+    background-color: #d9534f; /* Red background for warning messages */
+    color: #fff; /* White text color for warning messages */
+}

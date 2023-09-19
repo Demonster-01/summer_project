@@ -1,0 +1,106 @@
+{% extends "movie_sys/base.html" %}
+
+{% block title %} Watch later {% endblock %}
+{% block content %}
+
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                {% if message.tags %}
+                <h4 class="msg {{ message.tags }} fs-3">
+                    {% endif %}
+                    {{ message }}
+                </h4>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <script>
+    // Wait for 10 seconds and then remove the messages
+    setTimeout(function() {
+        var messages = document.querySelectorAll('.messages');
+        messages.forEach(function(message) {
+            message.remove();
+        });
+    }, 6000); // 10000 milliseconds = 10 seconds
+    </script>
+
+
+<div class="container">
+    <table class="table border rounded">
+        <legend>Booked Seats</legend>
+        <thead>
+        <tr>
+            <th scope="col">Movie name</th>
+            <th scope="col">Genre</th>
+            <th scope="col">Seat</th>
+            <th scope="col">Purchase time</th>
+            <th scope="col">screening date & time</th>
+            <th scope="col">Cacel show</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for booking in all_bookings %}
+        <tr class="table-active">
+            <td>{{ booking.movie }}</td>
+            <td>{{ booking.movie.genre }}</td>
+            <td>{{ booking.seat_row }}{{ booking.seat_column }}</td>
+            <td>{{ booking.purchase_time }}</td>
+            <td>{{ booking.selected_screening }}</td>
+            <td>
+                {% if not booking.canceled %}
+                <a href="{% url 'cancel_booking' booking.id %}">
+                    <span class="btn btn-outline-danger bi bi-trash">Cancel</span>
+                </a>
+                {% else %}
+                <p>Canceled</p>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+
+
+        </tbody>
+    </table>
+
+</div>
+
+<center>
+    <h2>Watch Later OTT Movies:</h2>
+</center>
+<!--<ul>-->
+<!--    {% for ott in watch_later_ott %}-->
+<!--    <li><a href="{% url 'ott_detail' pk=ott.pk %}">{{ ott.title }}</a></li>-->
+<!--    {% endfor %}-->
+<!--</ul>-->
+<div class="container col-md-8">
+    <table class="table border rounded">
+        <legend>Watch now than later:</legend>
+        <thead>
+        <tr>
+            <th scope="col">Movie name</th>
+            <th scope="col">Genre</th>
+            <th scope="col">Watch now</th>
+            <th scope="col">remove</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for ott in watch_later_ott %}
+        <tr class="table-active">
+            <td>{{ ott.title }}</td>
+            <td>{{ ott.genre }}</td>
+            <td><a class="btn btn-sm btn-primary" href="{% url 'ott_detail' pk=ott.pk %}">Play</a></td>
+            <td>
+                <a href="{% url 'remove_watch_later' pk=ott.pk %}">
+                    <span class="btn btn-sm btn-outline-danger bi bi-trash">Remove</span>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

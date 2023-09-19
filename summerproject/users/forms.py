@@ -10,11 +10,12 @@ from .models import Profile
 
 
 class UserRegisterForm(UserCreationForm):
-    email = forms.EmailField()  # we can live EmailFirld(required=True) for true
-
+    email = forms.EmailField()  # we can live EmailField(required=True) for true
+    first_name = forms.CharField()
+    last_name = forms.CharField(required=True)
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username','first_name','last_name','email', 'password1', 'password2']
 
 
 # class UserUpdateForm(forms.ModelForm):

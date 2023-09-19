@@ -32,11 +32,12 @@ class Movie(models.Model):
     # id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50, null=False)
     poster = models.ImageField(default="default.jpg", upload_to='movie_poster')
-    releasing_date = models.DateField()
+    trailer_video = models.FileField(default="404Error.png",upload_to='movie_trailer_video/',null=True,blank=True)
+    releasing_date = models.DateField( null=True,blank=True)
     screening_datetime = models.DateTimeField(
         default=timezone.localtime(timezone.now()).replace(hour=13, minute=0, second=0, microsecond=0))
-    screening_datetime2 = models.DateTimeField(null=True)
-    screening_datetime3 = models.DateTimeField(null=True)
+    screening_datetime2 = models.DateTimeField(null=True,blank=True)
+    screening_datetime3 = models.DateTimeField(null=True,blank=True)
     genre = models.CharField(max_length=50, null=True)
     cast = models.CharField(max_length=200, null=True)
     directed_by = models.CharField(max_length=50, null=True)
@@ -44,7 +45,7 @@ class Movie(models.Model):
     description = models.CharField(max_length=500, null=True)
     # booked_seats = models.ManyToManyField('Booking', blank=True)
     promo_code = models.CharField(max_length=50, blank=True, null=True)
-    offer = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    offer = models.DecimalField(max_digits=5, decimal_places=2, null=True,blank=True)
     ticket_price = models.IntegerField(validators=[MinValueValidator(1)], default=1)
     reserved_seats = models.JSONField(blank=True, null=True)
     # ... other fields and methods ...
@@ -92,35 +93,53 @@ class Upcomming(models.Model):
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     purchase_time = models.DateTimeField(auto_now_add=True, null=True)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, default=1)
-    seat_row = models.CharField(max_length=5, default=0)
-    seat_column = models.CharField(max_length=5, default=0)
-    # status = models.BooleanField(default=True)
+    seat_row = models.CharField(max_length=10, default=0)
+    seat_column = models.CharField(max_length=1, default=0)
+    is_booked = models.BooleanField(default=False)
+    version = models.IntegerField(default=0)
+    selected_screening = models.DateTimeField(null=True)
+    is_canceled = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('movie', 'seat_row', 'seat_column')
 
     def __str__(self):
-        return f"Booking for {self.movie.title} - Seat {self.seat_row}-{self.seat_column}"
+        return f"Booking {self.movie.title} - Seat {self.seat_row}-{self.seat_column}"
 
 class Booking2(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     purchase_time = models.DateTimeField(auto_now_add=True, null=True)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, default=1)
-    seat_row = models.CharField(max_length=5, default=0)
-    seat_column = models.CharField(max_length=5, default=0)
-    # status = models.BooleanField(default=True)
+    seat_row = models.CharField(max_length=10, default=0)
+    seat_column = models.CharField(max_length=1, default=0)
+    is_booked = models.BooleanField(default=False)
+    version = models.IntegerField(default=0)
+    selected_screening = models.DateTimeField(null=True)
+    is_canceled = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('movie', 'seat_row', 'seat_column')
 
     def __str__(self):
         return f"Booking for 2nd {self.movie.title} - Seat {self.seat_row}-{self.seat_column}"
 
 
 class Booking3(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     purchase_time = models.DateTimeField(auto_now_add=True, null=True)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, default=1)
-    seat_row = models.CharField(max_length=5, default=0)
-    seat_column = models.CharField(max_length=5, default=0)
-    # status = models.BooleanField(default=True)
+    seat_row = models.CharField(max_length=10, default=0)
+    seat_column = models.CharField(max_length=1, default=0)
+    is_booked = models.BooleanField(default=False)
+    version = models.IntegerField(default=0)
+    selected_screening = models.DateTimeField(null=True)
+    is_canceled = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('movie', 'seat_row', 'seat_column')
 
     def __str__(self):
         return f"Booking for 3rd {self.movie.title} - Seat {self.seat_row}-{self.seat_column}"
@@ -150,7 +169,9 @@ class Ott(models.Model):
         return self.title
 
 
-
+class WatchLater(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    movie_title = models.ForeignKey(Ott,on_delete=models.CASCADE)
 
 def is_screening_time_passed(screening_time):
     current_time = datetime.now().time()

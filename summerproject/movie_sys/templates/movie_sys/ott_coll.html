@@ -2,9 +2,9 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    {% if user.profile.role == 'admin'%}
-        <a style="width:300px; align:left;" class="btn btn-secondary " href="{% url 'ott-create' %}">Add OTT movie </a>
-    {% endif %}
+{% if user.profile.role == 'admin'%}
+<a style="width:300px; align:left;" class="btn btn-secondary " href="{% url 'ott-create' %}">Add OTT movie </a>
+{% endif %}
 {% endif %}
 {% if ott_list %}
 <div class="row">
@@ -16,6 +16,9 @@
             <h2 style="font-size:25px;">{{ ott.title }}</h2>
             <p>{{ ott.description }}</p>
         </a>
+        <div>
+            <a href="{% url 'add_watch_later' pk=ott.pk %}" class="btn btn-primary">Add watch later</a>
+        </div>
     </div>
 
     {% endfor %}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Seat Map</title>
+</head>
+<body>
+    <h1>Seat Map</h1>
+
+
+<!-- ... (other HTML content) ... -->
+<!-- ... (other HTML content) ... -->
+
+{% load custom_tags %}
+
+
+<!-- ... (other HTML content) ... -->
+
+<!-- ... (other HTML content) ... -->
+
+<table>
+    <tbody>
+    {% for row in 5|get_range %}
+        <tr>
+        {% for column in 5|get_range %}
+            <td>
+            {% for seat in seats %}
+                {% if seat.row == row and seat.column == column %}
+                    {% if seat.is_booked %}
+                        <span style="color: red;">X</span>
+                    {% else %}
+                        <a href="{% url 'book_seat' seat.row seat.column %}">Book</a>
+                    {% endif %}
+                    {% cycle "" "" "" as seat_found %}
+                {% endif %}
+            {% empty %}
+                -  <!-- Display a hyphen if no seat is found for the current row and column -->
+            {% endfor %}
+            </td>
+            {% if seat_found %}
+            <p>seatM</p>
+            {% endif %}
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- ... (other HTML content) ... -->
+
+
+
+<!-- ... (other HTML content) ... -->
+
+
+<!-- ... (other HTML content) ... -->
+
+
+<!-- ... (other HTML content) ... -->
+
+    <a href="{% url 'login' %}">Login</a> | <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>
