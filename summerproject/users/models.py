@@ -15,12 +15,25 @@ class Profile(models.Model):
         ('client', 'Client'),
         ('manager', 'Manager'),
     )
+    is_approved = models.CharField(
+        max_length=5,  # Adjust the max length as needed
+        choices=(
+            ('false', 'False'),
+            ('true', 'True'),
+        ),
+        default='false',  # Set the default value to 'false'
+    )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
     contact = models.IntegerField(unique=True, blank=True,null=True)
     watch_later = models.ManyToManyField(Ott)
 
+
     def __str__(self):
         return f'{self.user.username} Profile'
+    def delete(self, *args, **kwargs):
+        # Delete the associated User
+        self.user.delete()
+        super().delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

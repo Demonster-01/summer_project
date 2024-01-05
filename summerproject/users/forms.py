@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.forms import HiddenInput
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 
@@ -13,6 +14,8 @@ class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()  # we can live EmailField(required=True) for true
     first_name = forms.CharField()
     last_name = forms.CharField(required=True)
+    # Use the HiddenInput widget to hide the "approved" field
+    # approved = forms.BooleanField(widget=HiddenInput(), initial=True)
     class Meta:
         model = User
         fields = ['username','first_name','last_name','email', 'password1', 'password2']

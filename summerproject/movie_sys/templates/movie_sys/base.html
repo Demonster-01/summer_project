@@ -43,15 +43,16 @@
                         <div class="dropdown show">
                             <a class="nav-item nav-link" href="#" role="button" id="dropdownMenuLink"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                More<i class="bi bi-three-dots-vertical"></i>
+                                More
+                                <i class="bi bi-three-dots-vertical"></i>
                             </a>
 
                             <div class="dropdown-menu bg-secondary border rounded" aria-labelledby="dropdownMenuLink">
                                 {% if user.profile.role == 'admin' or user.profile.role == 'manager' %}
                                 <a class="dropdown-item" href="{% url 'theater-create' %}">create theater</a>
+                                <a class="dropdown-item" href="{% url 'registration_requests' %}">Request approveal</a>
                                 {% endif %}
-                                <a class="dropdown-item" href="#">Customer service</a>
-                                <a class="dropdown-item" href="#">Something else here</a>
+<!--                                <a class="dropdown-item" href="#">Customer service</a>-->
                             </div>
                         </div>
                     </div>
@@ -93,11 +94,11 @@
             <div class="col-lg-3 mb-3">
                 <a class="d-inline-flex align-items-center mb-2 text-body-secondary text-decoration-none" href="/"
                    aria-label="Bootstrap">
-                    <span class="fs-5">Nepal cinema</span>
+                    <span class="fs-5">QFX Nepal cinema</span>
                 </a>
                 <ul class="list-unstyled small">
                     <li class="mb-2">Browse and have fun cinema </a>.</li>
-                    <li class="mb-2">Code licensed <a href="#">CC BY 3.0</a>.</li>
+                    <li class="mb-2">Code licensed <a href="#">CC BY Suresh Shrestha NCC</a>.</li>
                 </ul>
             </div>
             <div class="col-6 col-lg-2 offset-lg-1 mb-3">
@@ -113,22 +114,22 @@
                     <li class="mb-2"><a href="#">How to use</a></li>
                 </ul>
             </div>
-            <div class="col-6 col-lg-2 mb-3">
-                <h5>Cinema Partners</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="#">Qfx</a></li>
-                    <li class="mb-2"><a href="#">Big cinemas</a></li>
-                    <li class="mb-2"><a href="#">F cube</a></li>
-                </ul>
-            </div>
-            <div class="col-6 col-lg-2 mb-3">
-                <h5>Payment partner</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="#">Esewa</a></li>
-                    <li class="mb-2"><a href="#">Khalti</a></li>
-                    <li class="mb-2"><a href="#">fone pay</a></li>
-                </ul>
-            </div>
+<!--            <div class="col-6 col-lg-2 mb-3">-->
+<!--                <h5>Cinema Partners</h5>-->
+<!--                <ul class="list-unstyled">-->
+<!--                    <li class="mb-2"><a href="#">Qfx</a></li>-->
+<!--                    <li class="mb-2"><a href="#">Big cinemas</a></li>-->
+<!--                    <li class="mb-2"><a href="#">F cube</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--            <div class="col-6 col-lg-2 mb-3">-->
+<!--                <h5>Payment partner</h5>-->
+<!--                <ul class="list-unstyled">-->
+<!--                    <li class="mb-2"><a href="#">Esewa</a></li>-->
+<!--                    <li class="mb-2"><a href="#">Khalti</a></li>-->
+<!--                    <li class="mb-2"><a href="#">fone pay</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
         </div>
 
 

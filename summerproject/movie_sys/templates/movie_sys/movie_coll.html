@@ -13,7 +13,7 @@
     <p>Logged-in User: {{ user }}</p>
     <p>Theater Owner: {{ theater.user }}</p>
      {% if request.user == theater.user %}
-        <a style="width:300px; align:left;" class="btn btn-secondary" href="{% url 'movie-create' user_id=theater.user.id %}">Add 2 movie</a>
+        <a style="width:300px; align:left;" class="btn btn-secondary" href="{% url 'movie-create' user_id=theater.user.id %}">Add movie</a>
     {% endif %}
 {% endif %}
 

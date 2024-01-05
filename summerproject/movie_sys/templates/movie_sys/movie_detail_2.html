@@ -45,17 +45,7 @@
 
 
 <script>
-function updateCurrentTime() {
-    var currentTimeElement = document.getElementById('current-time');
-    var currentTime = new Date().toLocaleTimeString();
-    currentTimeElement.innerHTML = currentTime;
-}
 
-// Update the current time initially
-updateCurrentTime();
-
-// Update the current time every second (adjust the interval as needed)
-setInterval(updateCurrentTime, 1000);
 
 </script>
 
@@ -68,7 +58,8 @@ setInterval(updateCurrentTime, 1000);
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}
-    {% if message.tags %}<li class="message {{ message.tags }}">{% endif %}>{{ message }}</li>
+    {% if message.tags %}<Kbd class="message {{ message.tags }}">
+    {% endif %}{{ message }}</Kbd>
     {% endfor %}
 </ul>
 {% endif %}
@@ -116,8 +107,8 @@ setInterval(updateCurrentTime, 1000);
         </div>
         <div class="pay">
             <h1>Payment</h1>
-            <input type="text" placeholder="Offer/Promo" id="promo"><br>
-            <input type="checkbox" class="check" id="check" value=" ">
+<!--            <input type="text" placeholder="Offer/Promo" id="promo"><br>-->
+            <input type="checkbox" class="check" id="check" value=" " required>
             <label for="check">I accept all the terms and conditions</label><br>
             <p>Selected Seats:</p>
             <ul id="selected_seats_list"></ul>

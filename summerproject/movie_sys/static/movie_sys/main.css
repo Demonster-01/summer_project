@@ -333,3 +333,9 @@ input[type="checkbox"]:checked {
     background-color: #d9534f; /* Red background for warning messages */
     color: #fff; /* White text color for warning messages */
 }
+.error {
+    background-color: red;
+    color: white;
+    padding: 5px;
+    margin-bottom: 5px;
+}

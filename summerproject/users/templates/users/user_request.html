@@ -1,10 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'movie_sys/base.html' %}
 
-</body>
-</html>
+{% block content %}
+<div class="module">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <span class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </span>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if registration_requests %}
+    <table class="border table" summary="Unapproved Registration Requests">
+
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for request in registration_requests %} {# Use registration_requests here #}
+
+        <tr>
+            <td>{{ request.user.username }}</td>
+            <td>{{ request.user.email }}</td>
+            <td>
+                <div class="row col-sm-6">
+                    <a href="{% url 'approve_registration' request.id %}" class="col-sm-5 btn btn-Success">Accept</a>
+                    <a href="{% url 'reject_registration' request.id %}"
+                       class="col-sm-5  btn btn-outline-danger">Reject</a>
+
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No registration requests at the moment.</p>
+    {% endif %}
+</div>
+{% endblock %}
