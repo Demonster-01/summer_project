@@ -205,27 +205,7 @@ table.coll_table td {
 
 /*seat and pay*/
 /*.seat_pay{
-  width: 100%;
-  border: solid 2px;
-  border-color: red ;
-}
-.seat{
-  width: 70%;
-  float: right;
-  padding: 5% 0;
 
-  border: solid 2px;
-  border-color: gold ;
-
-}
-.pay{
-  width: 30%;
-  height: 100%;
-  padding: auto;
-
-  border: solid 2px;
-  border-color: green ;
-}
 */
 .seat_pay {
   margin-left: 10%;
