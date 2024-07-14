@@ -1,26 +1,87 @@
 {% extends "movie_sys/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="content-section">
+<div class="content-section ">
     <form method="POST">
         {% csrf_token %}
         <fieldset class="form-group">
             <legend class="border-bottom mb-4">Login</legend>
-            {{ form|crispy}}
         </fieldset>
-        <div class="form-group">
-            <button class="btn btn-outline-info" type="submit">Login</button>
+        <div class="form-group col-md-12">
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <kbd class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </kbd>
+
+                {% endfor %}
+            </ul>
+              <br>
+            {% endif %}
+
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" aria-label="Username" placeholder="Username" required><br>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" aria-label="Password" placeholder="Password" required><br>
+            <button class="btn btn-success" type="submit">Login</button>
             <small class="text-muted ml-2">
-                <a class="ml-2" href="{% url 'password_reset' %}" >Forgot password?</a>
+                <a class="ml-2" href="{% url 'password_reset' %}">Forgot password?</a>
             </small>
+
         </div>
     </form>
     <div class="border-top pt-3">
         <small class="text-muted">
-            Need an account<a class="ml-2" href="{% url 'register' %}" >Sign up</a>
+            Need an account? <a class="ml-2" href="{% url 'register' %}">Sign up</a>
         </small>
     </div>
 </div>
+<style>
+    /* Add custom CSS styles here */
+    .content-section {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .btn-success {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+
+    .btn-success:hover {
+        background-color: #45a049;
+    }
+
+    .text-muted a {
+        text-decoration: none;
+    }
+
+    /* Style for error messages */
+    .messages {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .messages li.error {
+
+    background-color:  #ff8080;
+        color: white;
+        font-weight: bold;
+    }
+</style>
 {% endblock content %}
-
-

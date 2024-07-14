@@ -1,0 +1,31 @@
+{% extends "movie_sys/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %} Search {% endblock %}
+{% block content %}
+
+{% for profile in profiles %}
+<h3>this is the search result for {{ profile.user.email }} </h3>
+
+{% for profile in profiles %}
+    <tr>
+<!--        <td> {{ profile.image }}</td><br>-->
+         <td>Profile image: <br><img src="{{ profile.image.url }}" alt="{{ profile.img }}"></td><br><hr>
+        <td>username: {{ profile.user.username }}</td><br>
+        <td>user PK id: {{ profile.user.id }}</td><br>
+        <td>Email: {{ profile.user.email }}</td><br>
+        <td>current role in server: {{ profile.role }}</td><br>
+        <td>Thearter name: {{ profile.theater_name }}</td><br>
+            <a href="{% url 'user-update' profile.id %}">change {{ profile.user.username }}'s role</a><br> <hr>
+
+    </tr>
+
+
+{% endfor %}
+
+
+
+{% endfor %}
+{% endblock content %}
+
+

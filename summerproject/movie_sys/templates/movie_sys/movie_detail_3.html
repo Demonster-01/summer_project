@@ -1,0 +1,298 @@
+{% extends "movie_sys/base.html" %}
+
+{% block content %}
+
+
+<div class="container-fluid">
+    <div class="row align-items-center">
+        <div class="col-md-6 d-flex justify-content-start align-items-center">
+            <button type="button" class="btn btn-danger btn-sm ml-2" id="goBackButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"></path>
+                </svg>
+            </button>
+
+            <h1 style="display:inline;" class="ml-2">{{ object.theater.theater_name }}</h1>
+        </div>
+    </div>
+</div>
+
+
+
+<hr style="color: white">
+<h2 style="color: #d4fff7">Movie: {{ object.title }}</h2>
+
+<div class="timing">
+    <a href="{% url 'movie_detail' movie.pk %}" style="color: #d4fff7">
+        <div class="times">
+            &#128338 Screening time: {{ object.screening_datetime|date:'H:i' }}
+        </div>
+    </a>
+    <a href="{% url 'movie_detail_2' movie.pk %}" style="color: #d4fff7">
+        <div class="times">
+            &#128338 Screening time: {{ object.screening_datetime2|date:'H:i' }}
+        </div>
+    </a>
+    <a href="{% url 'movie_detail_3' movie.pk %}" style="color: #d4fff7">
+        <div class="times active">
+            now: &#128338 Screening time: {{ object.screening_datetime3|date:'H:i' }}
+        </div>
+    </a>
+</div>
+<!--<p>Current time: {{ current_time }}</p>-->
+<p>Current time: <span id="current-time"></span></p>
+
+
+<script>
+function updateCurrentTime() {
+    var currentTimeElement = document.getElementById('current-time');
+    var currentTime = new Date().toLocaleTimeString();
+    currentTimeElement.innerHTML = currentTime;
+}
+
+// Update the current time initially
+updateCurrentTime();
+
+// Update the current time every second (adjust the interval as needed)
+setInterval(updateCurrentTime, 1000);
+
+
+</script>
+
+<center>
+    <input type="checkbox" class="seat_box" disabled style="background-color: red;">= reserved can't choose
+    <input type="checkbox" class="seat_box" disabled style="background-color: green;">= your selection
+    <input type="checkbox" class="seat_box" disabled style="background-color: #404040;">= empty
+</center></h6>
+<hr>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    {% if message.tags %}
+    <li class="msg {{ message.tags }} fs-3">
+        {% endif %}
+        {{ message }}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+<!--<ul>-->
+<!--    {% for booking in bookings3 %}-->
+<!--    <li>{{ booking.seat_column }}{{ booking.seat_row }}</li>-->
+<!--    {% endfor %}-->
+<!--</ul>-->
+
+
+<form action="{% url 'process_bookings3' pk=movie.id %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="selected_screening" value="{{ object.screening_datetime3|date:'H:i' }}">
+    <div class="seat_pay">
+        <div class="seat">
+            <table>
+                <tbody>
+                <tr>
+                    <td></td>
+                    {% for col in 'ABCDEFGHIJ' %}
+                    <td>{{ col }}</td>
+                    {% endfor %}
+                </tr>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row }} R</td>
+                    {% for col in 'ABCDEFGHIJ' %}
+                    <td>
+                        {% if row|add:col in booked_seats %}
+                        <input type="checkbox" class="seat_box" name="seat" value="{{ row }}{{ col }}" data-price=10
+                               disabled>
+                        {% else %}
+                        <input type="checkbox" class="seat_box" name="seat" value="{{ row }}{{ col }}" data-price=10>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+
+
+                </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+            <span>->->->->->->->->->Screen here-<-<-<-<-<-<-<-<-</span>
+        </div>
+        <div class="pay">
+            <h1>Payment</h1>
+<!--            <input type="text" placeholder="Offer/Promo" id="promo"><br>-->
+            <input type="checkbox" class="check" id="check" value=" " required>
+            <label for="check">I accept all the terms and conditions</label><br>
+            <p>Selected Seats:</p>
+            <ul id="selected_seats_list"></ul>
+            <div>
+                <p id="total_price"></p>
+            </div>
+
+
+            <button class="btn btn-success" type="submit">Submit</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+
+{% block script %}
+
+
+<script>
+    const all_seats = document.querySelectorAll('.row .seat');
+    const cta_btn = document.querySelector('button.purchase_btn');
+
+    async function contactAPI(url, body) {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        return response.json();
+    }
+
+    function refreshSeat() {
+        const movieSelect = document.querySelector('#movieSelect');
+        const movie_title = movieSelect.options[movieSelect.selectedIndex].id;
+
+        contactAPI("/occupied/", { movie_title }).then(data => {
+            const occupied_seat = data['occupied_seats'];
+            const movie_title = data["movie_title"];
+
+            const seat_LocalStorage = localStorage.getItem('selectedSeats') ? JSON.parse(localStorage.getItem('selectedSeats')) : null;
+            const movie_index = localStorage.getItem("selectedMovieIndex");
+
+            all_seats.forEach(seat => {
+                seat.classList.remove("occupied");
+            });
+
+            const LS_movie = movieSelect.options[movie_index].textContent;
+
+            if (LS_movie === movie_title) {
+                if (occupied_seat !== null && occupied_seat.length > 0) {
+                    all_seats.forEach((seat, index) => {
+                        if (occupied_seat.includes(index)) {
+                            seat.classList.add('occupied');
+                            seat.classList.remove('selected');
+                        }
+                    });
+                }
+
+                if (seat_LocalStorage !== null) {
+                    seat_LocalStorage.forEach((seat, index) => {
+                        if (occupied_seat.includes(seat)) {
+                            seat_LocalStorage.splice(index, 1);
+                            localStorage.setItem("selectedSeats", JSON.stringify(seat_LocalStorage));
+                        }
+                    });
+                }
+            }
+            updateSelectedCount();
+        });
+    }
+
+    refreshSeat();
+
+    cta_btn.addEventListener("click", e => {
+        const movieSelect = document.querySelector('#movieSelect');
+        const movie_title = movieSelect.options[movieSelect.selectedIndex].id;
+        const seat_list = JSON.parse(localStorage.getItem("selectedSeats"));
+
+        if (seat_list !== null && seat_list.length > 0) {
+            const data = {
+                movie_title,
+                seat_list
+            };
+
+            contactAPI("/payment/", data).then(res => {
+                if (res["payment_url"]) {
+                    // Redirect the customer
+                    window.location.href = res["payment_url"];
+                } else {
+                    console.log('error');
+                }
+            }).catch(e => {
+                console.log(e);
+            });
+        }
+    });
+
+
+</script>
+
+
+<script>
+    // Get the list element
+    var selectedSeatsList = document.getElementById("selected_seats_list");
+
+    // Get all the seat checkboxes
+    var seatBoxes = document.getElementsByClassName("seat_box");
+
+    // Get the ticket price
+    var ticketPrice = 10.0;
+
+    // Get the offer value (if any)
+    var offer = "{{ booking.offer }}";
+    if (offer === "") {
+        offer = 0;
+    }
+
+    // Loop through the checkboxes and add a change listener
+    for (var i = 0; i < seatBoxes.length; i++) {
+        seatBoxes[i].addEventListener("change", function () {
+            // Create an empty array to store the selected seats
+            var selectedSeats = [];
+
+            // Loop through the checkboxes again and add the selected seats to the array
+            for (var j = 0; j < seatBoxes.length; j++) {
+                if (seatBoxes[j].checked) {
+                    var seatRow = seatBoxes[j].value.substring(0, 1);  // Extract the row value from the seat string
+                    var seatCol = seatBoxes[j].value.substring(1);    // Extract the column value from the seat string
+                    selectedSeats.push(seatRow + seatCol);
+                }
+            }
+
+            // Set the text of the list element to the selected seats array
+            var numSelectedSeats = selectedSeats.length;
+            var selectedSeatsMessage = numSelectedSeats + " seat(s) selected: " + selectedSeats.join(", ");
+            selectedSeatsList.textContent = selectedSeatsMessage;
+
+            // Calculate the total price based on the selected seats and the ticket price
+            var totalPrice = numSelectedSeats * ticketPrice * (1 - offer / 100);
+            var priceMessage = "Total price: " + totalPrice.toFixed(2) + " EUR";
+            document.getElementById("total_price").textContent = priceMessage;
+        });
+    }
+
+    // Disable checkboxes for booked seats
+var bookedSeats = [
+    {% for booking in bookings3 %}
+        "{{ booking.seat_row }}{{ booking.seat_column }}",
+    {% endfor %}
+].map(seat => seat.replace('-', ''));
+
+
+    for (var i = 0; i < seatBoxes.length; i++) {
+        var seatValue = seatBoxes[i].value;
+        if (bookedSeats.includes(seatValue)) {
+            seatBoxes[i].disabled = true;
+        }
+    }
+
+
+
+
+
+</script>
+
+
+{% endblock %}
+

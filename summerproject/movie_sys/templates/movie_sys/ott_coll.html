@@ -1,0 +1,49 @@
+{% extends 'movie_sys/base.html'%}
+
+{% block content %}
+{% if user.is_authenticated %}
+{% if user.profile.role == 'admin'%}
+<a style="width:300px; align:left;" class="btn btn-secondary " href="{% url 'ott-create' %}">Add OTT movie </a>
+{% endif %}
+{% endif %}
+{% if ott_list %}
+<div class="row">
+    {% for ott in ott_list %}
+    <div class="col-md-2 ott_mov" style="border: 1px solid white;">
+        <!--<a href="{% url 'ott_detail' pk=ott.pk %}">-->
+        <a href="{% url 'ott_detail' pk=ott.pk %}">
+            <img src="{{ ott.poster.url }}" alt="{{ ott.title }}" width="200px" height="250px">
+            <h2 style="font-size:25px;">{{ ott.title }}</h2>
+            <p>{{ ott.description }}</p>
+        </a>
+        <div>
+            <a href="{% url 'add_watch_later' pk=ott.pk %}" class="btn btn-primary">Add watch later</a>
+        </div>
+    </div>
+
+    {% endfor %}
+    {% if is_paginated %}
+
+    {% if page_obj.has_previous %}
+    <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+    <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+    {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+    <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+    {% endif %}
+
+    {% endif %}
+
+</div>
+{% endif %}
+{% endblock content %}

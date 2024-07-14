@@ -26,6 +26,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -115,11 +117,19 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 # settings.py
 
 CSRF_COOKIE_HTTPONLY = True
+TIME_ZONE = 'Asia/Kathmandu'
+
+
+
+
+
 
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -137,3 +147,20 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = 'jgwqdoopraytdnzg'
+
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',  # Set this to the desired level, e.g., DEBUG, INFO, ERROR
+    },
+}
