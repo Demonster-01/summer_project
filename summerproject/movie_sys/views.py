@@ -80,7 +80,6 @@ class MovieDetailView(DetailView):
             self.export_to_csv('old_booking_data.csv')
             Booking.objects.all().delete()
         else:
-            # Perform actions when screening time has not passed
             print("The screening time has not passed yet.")
     def export_to_csv(self, filename):
         bookings = Booking.objects.all()
@@ -105,7 +104,7 @@ class MovieDetailView(DetailView):
         context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
 
 
-        self.check_screening_time()  # Call the method to check screening time
+        self.check_screening_time()
 
         return context
 
@@ -122,12 +121,10 @@ class MovieDetailView2(DetailView):
         screening_time = screening_time.replace(second=0, microsecond=0)
 
         if current_time >= screening_time:
-            # Perform actions when screening time has passed
             print("The screening time has passed.")
             self.export_to_csv('old_booking_data.csv')
             Booking2.objects.all().delete()
         else:
-            # Perform actions when screening time has not passed
             print("The screening time has not passed yet.")
     def export_to_csv(self, filename):
         bookings2 = Booking2.objects.all()
@@ -152,7 +149,7 @@ class MovieDetailView2(DetailView):
         context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
 
 
-        self.check_screening_time()  # Call the method to check screening time
+        self.check_screening_time() 
 
         return context
 
@@ -167,12 +164,10 @@ class MovieDetailView3(DetailView):
         screening_time = screening_time.replace(second=0, microsecond=0)
 
         if current_time >= screening_time:
-            # Perform actions when screening time has passed
             print("The screening time has passed.")
             self.export_to_csv('old_booking_data.csv')
             Booking3.objects.all().delete()
         else:
-            # Perform actions when screening time has not passed
             print("The screening time has not passed yet.")
     def export_to_csv(self, filename):
         bookings = Booking.objects.all()
@@ -197,13 +192,13 @@ class MovieDetailView3(DetailView):
         context['current_time'] = timezone.localtime().strftime('%H:%M:%S')
 
 
-        self.check_screening_time()  # Call the method to check screening time
+        self.check_screening_time() 
 
         return context
 
 class TrailerView(DetailView):
     model = Movie
-    template_name = 'movie_sys/trailer_play.html'  # replace with your actual template name
+    template_name = 'movie_sys/trailer_play.html' 
     context_object_name = 'trailer'
 
 
@@ -332,56 +327,6 @@ class TheaterCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-
-
-@csrf_exempt
-def check_booking_lock(request):
-    movie_id = request.POST.get('movie_id')
-    lock_key = f'booking_lock_{movie_id}'
-    is_locked = request.session.get(lock_key, False)
-
-    return JsonResponse({'is_locked': is_locked})
-
-# @login_required(login_url='login')
-# def process_bookings(request, pk):
-#     if request.method == 'POST':
-#         selected_seats = request.POST.getlist('seat')
-#         movie = get_object_or_404(Movie, pk=pk)
-#         user = request.user
-#         selected_screening =movie.screening_datetime
-#
-#         if user is None:
-#             messages.warning(request, 'Please login to proceed with the booking.')
-#             return redirect('login')
-#         # Define the maximum allowed bookings for the user
-#         max_allowed_bookings = 10
-#
-#         # Count the user's existing bookings
-#         existing_bookings = Booking.objects.filter(user=user).count()
-#
-#         current_datetime = datetime.now(pytz.utc)
-#         screening_datetime = movie.screening_datetime.astimezone(pytz.utc)
-#         time_difference = screening_datetime - current_datetime
-#         if time_difference <= timedelta(minutes=40):
-#             messages.warning(request, 'The screening time is too close. Booking is not available.')
-#         elif existing_bookings >= max_allowed_bookings:
-#             messages.warning(request, 'You have already booked the maximum allowed seats.i.e 10seat per user')
-#         else:
-#             with transaction.atomic():
-#                 for seat in selected_seats:
-#                     row = seat[0]
-#                     col = seat[1]
-#
-#                     try:
-#                         # Attempt to create a booking while acquiring a row-level lock
-#                         booking = Booking(movie=movie, seat_row=row, seat_column=col, user=user,selected_screening = selected_screening)
-#                         booking.save()
-#                         save_booking_data(movie, row, col, user)
-#                         messages.success(request, f'Seat {row}{col}Booking successful! Enjoy the movie.')
-#                     except IntegrityError:
-#                         # The seat is already booked, handle gracefully
-#                         messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
-#     return redirect('movie_detail', pk=pk)
 
 
 def is_screening_time_passed(current_datetime, screening_datetime):
@@ -592,47 +537,6 @@ def process_bookings3(request, pk):
 
 
 
-# @login_required(login_url='login')
-# def process_bookings3(request, pk):
-#     if request.method == 'POST':
-#         selected_seats = request.POST.getlist('seat')
-#         movie = get_object_or_404(Movie, pk=pk)
-#         user = request.user
-#         selected_screening =movie.screening_datetime3
-#         print(selected_screening,"a000000000000000000000000000000")
-#
-#         if user is None:
-#             messages.warning(request, 'Please login to proceed with the booking.')
-#             return redirect('login')
-#
-#         current_datetime = datetime.now(pytz.utc)
-#         screening_datetime = movie.screening_datetime.astimezone(pytz.utc)
-#         time_difference = screening_datetime - current_datetime
-#         if time_difference <= timedelta(minutes=40):
-#             messages.warning(request, 'The screening time is too close. Booking is not available.')
-#             return redirect('movie_detail', pk=pk)
-#         #
-#         # if current_datetime >= screening_datetime:
-#         #     messages.warning(request, 'The screening time has passed. Booking is not available.')
-#         #     return redirect('movie_detail', pk=pk)
-#
-#         with transaction.atomic():
-#             for seat in selected_seats:
-#                 row = seat[0]
-#                 col = seat[1]
-#
-#                 try:
-#                     # Attempt to create a booking while acquiring a row-level lock
-#                     booking3 = Booking3(movie=movie, seat_row=row, seat_column=col, user=user,selected_screening = selected_screening)
-#                     booking3.save()
-#                     save_booking_data(movie, row, col, user)
-#                     messages.success(request, f'Seat {row}{col}Booking successful! Enjoy the movie.')
-#                 except IntegrityError:
-#                     # The seat is already booked, handle gracefully
-#                     messages.warning(request, f'Seat {row}{col} is already booked. Please select another seat.')
-#
-#     return redirect('movie_detail_3', pk=pk)
-
 
 def search_theater(request):
     if 'query' in request.GET:
@@ -670,7 +574,7 @@ def my_booking(request):
         return render(request, 'movie_sys/mybookings.html', context)
     else:
         # Handle the case where the user is not authenticated
-        return redirect('login')  # You can replace 'login' with the appropriate login URL
+        return redirect('login')  
 
 
 login_required(login_url='login')
@@ -690,7 +594,7 @@ def add_to_watch_later(request, pk):
         return redirect('ott_detail', pk=pk)
     else:
         # Handle the case where the user is not authenticated
-        return redirect('login')  # You can replace 'login' with the appropriate login URL
+        return redirect('login')  
 
 
 
@@ -705,8 +609,7 @@ def cancel_booking(request, booking_id):
                        list(Booking2.objects.filter(user=user, is_canceled=False)) + \
                        list(Booking3.objects.filter(user=user, is_canceled=False))
 
-        # Fetch the booking to cancel
-        # booking_to_cancel = Booking.objects.get(id=booking_id, user=user, is_canceled=False)
+
         booking_to_cancel = next((booking for booking in all_bookings if booking.id == booking_id), None)
 
         # Calculate the time difference
@@ -743,26 +646,7 @@ def cancel_booking(request, booking_id):
         return redirect('my_booking')
 
 
-# @login_required(login_url='login')
-# def cancel_booking(request, booking_id):
-#     user = request.user
-#     try:
-#         all_bookings = list(Booking.objects.filter(user=user, is_canceled=False)) + \
-#                        list(Booking2.objects.filter(user=user, is_canceled=False)) + \
-#                        list(Booking3.objects.filter(user=user, is_canceled=False))
-#
-#         booking_to_cancel = next((booking for booking in all_bookings if booking.id == booking_id), None)
-#
-#
-#         if booking_to_cancel is None:
-#             return redirect('my_booking')
-#         booking_to_cancel.is_canceled = True
-#         # booking_to_cancel.save()
-#         booking_to_cancel.delete()
-#
-#         return redirect('my_booking')
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
+
 
 
 @login_required(login_url='login')
